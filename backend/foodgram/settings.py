@@ -61,7 +61,8 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-AUTH_USER_MODEL = "users.FoodgramUser"
+
+AUTH_USER_MODEL = 'users.FoodgramUser'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -79,7 +80,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LANGUAGE_CODE = "Ru-ru"
+LANGUAGE_CODE = "ru"
 
 TIME_ZONE = "Europe/Moscow"
 

@@ -1,4 +1,7 @@
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
+from django.core.exceptions import ValidationError
+
+from .constants import MIN_C_INGRIDIENTS, MIN_TIME
 
 
 class UserValidators:
@@ -21,3 +24,27 @@ class UserValidators:
         message="Некорректное ФИО",
         code="invalid_fio",
     )
+
+
+class RecipeValidators:
+    """Класс валидаторов для рецептов Foodgram."""
+
+    slug_validator = RegexValidator(
+        regex=r"^[-a-zA-Z0-9_]+$",
+        message="Некорректный слаг",
+        code="invalid_slug",
+    )
+
+    @staticmethod
+    def cook_time_validator(value):
+        if value <= 0:
+            raise ValidationError(
+                'Время приготовления должно быть больше нуля.'
+            )
+
+    @staticmethod
+    def count_ingredients_validator(value):
+        if value <= 0:
+            raise ValidationError(
+                'Количество ингредиентов должно быть больше нуля.'
+            )
