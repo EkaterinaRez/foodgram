@@ -39,7 +39,7 @@ class RecipesAdmin(admin.ModelAdmin):
 
         return Favorites.objects.filter(recipe=obj).count()
 
-    total_favorites.short_description = 'Total Favorites'
+    total_favorites.short_description = 'Всего добавлено в избранное'
 
 
 @admin.register(Favorites)
