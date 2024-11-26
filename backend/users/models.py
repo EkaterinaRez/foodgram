@@ -1,3 +1,4 @@
+import base64
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -35,6 +36,7 @@ class FoodgramUser(AbstractUser):
         max_length=128,
         help_text="Пароль должен быть надежным.",
     )
+    avatar = models.ImageField(upload_to='avatar/', null=True, blank=True)
 
     class Meta:
         verbose_name = "Пользователь"

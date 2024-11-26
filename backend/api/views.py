@@ -1,6 +1,6 @@
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (IsAuthenticated,
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from core.permissions import IsAdminOrReadOnly
@@ -27,7 +27,14 @@ class FoodgramUserViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def me(self, request):
+        """Получение и изменение информации о текущем пользователе."""
+
         user = request.user
+        if user.is_anonymous:
+            return Response(
+                {"detail": "Авторизуйтесь для доступа в профиль."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         if request.method == "GET":
             serializer = self.get_serializer(user)
             return Response(serializer.data)
@@ -41,6 +48,30 @@ class FoodgramUserViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST
             )
+
+    @action(
+        detail=False,
+        methods=("get","post", "delete", "patch"),
+        permission_classes=(IsAuthenticated,),
+        url_path='me/avatar'
+    )
+    def avatar(self, request):
+        user = request.user
+        file = request.FILES.get('avatar')
+        if not file:
+            return Response({"detail": "Нет файла."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.avatar = file
+        user.save()
+        return Response({"detail": "Аватар загружен."}, status=status.HTTP_200_OK)
+
+    def get_permissions(self):
+        if self.action == 'create':
+            self.permission_classes = (AllowAny,)
+        else:
+            self.permission_classes = (
+                IsAuthenticatedOrReadOnly, IsAdminOrReadOnly)
+        return super(FoodgramUserViewSet, self).get_permissions()
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
