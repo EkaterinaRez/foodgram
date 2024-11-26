@@ -5,6 +5,8 @@ from users.models import FoodgramUser
 
 
 class Tags(models.Model):
+    """Модель тегов."""
+
     name = models.CharField(max_length=32, unique=True, verbose_name="Тэг")
     slug = models.SlugField(
         max_length=32,
@@ -22,6 +24,8 @@ class Tags(models.Model):
 
 
 class Ingredients(models.Model):
+    """Модель ингредиентов."""
+
     name = models.CharField(
         max_length=128, unique=True, verbose_name="Название ингредиента"
     )
