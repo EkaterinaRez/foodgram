@@ -60,7 +60,7 @@ class Recipes(models.Model):
     tags = models.ManyToManyField(
         Tags, verbose_name="Теги", help_text="Выберите теги")
     image = models.ImageField(
-        # upload_to="media/",
+        upload_to="media/",
         verbose_name="Изображение",
         help_text="Выберите изображение",
     )
@@ -103,7 +103,7 @@ class IngredientsForRecipe(models.Model):
         on_delete=models.CASCADE,
         related_name='ingredients_list',
     )
-    count = models.PositiveSmallIntegerField(
+    amount = models.PositiveSmallIntegerField(
         'Количество',
         validators=[RecipeValidators.count_ingredients_validator]
     )

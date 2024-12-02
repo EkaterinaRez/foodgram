@@ -1,18 +1,22 @@
+
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 
-from core.filters import IngredientFilter
+from core.filters import IngredientFilter, RecipeFilter
 from core.paginations import ApiPagination
 from core.permissions import IsAdminOrReadOnly
-from recipes.models import Favorites, Tags, Ingredients
-from users.models import FoodgramUser
-
+from recipes.models import Favorites, Ingredients, Tags, Recipes
 from .serializers import (FavoriteSerializer,
                           FoodgramUserSerializer,
-                          TagSerializer, IngredientSerializer)
+                          IngredientSerializer,
+                          RecipeReadSerializer,
+                          RecipeWriteSerializer,
+                          TagSerializer
+                          )
+from users.models import FoodgramUser
 
 
 class FoodgramUserViewSet(viewsets.ModelViewSet):
@@ -62,6 +66,8 @@ class FoodgramUserViewSet(viewsets.ModelViewSet):
         url_path='me/avatar'
     )
     def avatar(self, request):
+        """Загрузка аватара текущего пользователя."""
+
         user = request.user
         file = request.FILES.get('avatar')
         if not file:
@@ -94,6 +100,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Tags.objects.all()
     serializer_class = TagSerializer
+    permission_classes = (AllowAny,)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -103,6 +110,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     filterset_class = IngredientFilter
+    permission_classes = (AllowAny,)
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
@@ -116,3 +124,47 @@ class FavoriteViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    """Вьюсет для управления рецептами."""
+
+    queryset = Recipes.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    filterset_class = RecipeFilter
+    pagination_class = ApiPagination
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return RecipeReadSerializer
+        return RecipeWriteSerializer
+
+    def create(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        if request.user != instance.author:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user != instance.author:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['get'])
+    def get_link(self, request, pk=None):
+        recipe = self.get_object()
+        short_link = f"https://clck.ru//{pk}"
+        return Response({'short_link': short_link})

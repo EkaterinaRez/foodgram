@@ -1,27 +1,25 @@
-from api.views import FavoriteViewSet, FoodgramUserViewSet, TagViewSet, IngredientViewSet
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from api.views import (FavoriteViewSet,
+                       FoodgramUserViewSet,
+                       IngredientViewSet,
+                       TagViewSet,
+                       RecipeViewSet)
+
 api_router = DefaultRouter()
 api_router.register('tags', TagViewSet, basename='tags')
 api_router.register('ingredients', IngredientViewSet, basename='ingredients')
 api_router.register('favorite', FavoriteViewSet, basename='favorites')
+api_router.register(r'recipes', RecipeViewSet, basename='recipes')
 api_router.register(r'users', FoodgramUserViewSet, basename='users')
-# api_v1_router.register(
-#     r'posts/(?P<post_id>\d+)/comments',
-#     CommentViewSet,
-#     basename='post-comments'
-# )
-
 
 urlpatterns_detail = [
     path('', include(api_router.urls)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
-    # path('auth/token/login/', TokenObtainPairView.as_view(),
-    #      name='token_obtain_pair'),
 ]
 urlpatterns = [
     path('', include(urlpatterns_detail)),
