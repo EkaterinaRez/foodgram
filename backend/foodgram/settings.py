@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_filters",
     "corsheaders",
     "djoser",
     'rest_framework.authtoken',
@@ -100,28 +101,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# REST_FRAMEWORK = {
-#     "DEFAULT_PERMISSION_CLASSES": [
-#         "rest_framework.permissions.IsAuthenticated",
-#     ],
-#     "DEFAULT_AUTHENTICATION_CLASSES": [
-#         "rest_framework_simplejwt.authentication.JWTAuthentication",
-#     ],
-#     "DEFAULT_THROTTLE_CLASSES": [
-#         "rest_framework.throttling.UserRateThrottle",
-#         "rest_framework.throttling.AnonRateThrottle",
-#     ],
-#     "DEFAULT_THROTTLE_RATES": {
-#         "user": "10000/day",
-#         "anon": "1000/day",
-#     },
-# }
-
-# SIMPLE_JWT = {
-#     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-#     "AUTH_HEADER_TYPES": ("Bearer",),
-# }
-
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -129,12 +108,12 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.TokenAuthentication",
     ),
+    "DEFAULT_FILTER_BACKENDS": ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
 }
-
 
 #CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [

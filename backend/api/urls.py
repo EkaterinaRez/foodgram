@@ -1,11 +1,12 @@
-from api.views import FavoriteViewSet, FoodgramUserViewSet, TagViewSet
+from api.views import FavoriteViewSet, FoodgramUserViewSet, TagViewSet, IngredientViewSet
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 api_router = DefaultRouter()
-api_router.register('tags', TagViewSet, basename='favorites')
+api_router.register('tags', TagViewSet, basename='tags')
+api_router.register('ingredients', IngredientViewSet, basename='ingredients')
 api_router.register('favorite', FavoriteViewSet, basename='favorites')
 api_router.register(r'users', FoodgramUserViewSet, basename='users')
 # api_v1_router.register(

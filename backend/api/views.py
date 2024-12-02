@@ -3,12 +3,16 @@ from rest_framework.decorators import action
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+
+from core.filters import IngredientFilter
 from core.paginations import ApiPagination
 from core.permissions import IsAdminOrReadOnly
-from recipes.models import Favorites, Tags
+from recipes.models import Favorites, Tags, Ingredients
 from users.models import FoodgramUser
 
-from .serializers import FavoriteSerializer, FoodgramUserSerializer, TagSerializer
+from .serializers import (FavoriteSerializer,
+                          FoodgramUserSerializer,
+                          TagSerializer, IngredientSerializer)
 
 
 class FoodgramUserViewSet(viewsets.ModelViewSet):
@@ -61,11 +65,15 @@ class FoodgramUserViewSet(viewsets.ModelViewSet):
         user = request.user
         file = request.FILES.get('avatar')
         if not file:
-            return Response({"detail": "Нет файла."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Нет файла."},
+                            status=status.HTTP_400_BAD_REQUEST
+                            )
 
         user.avatar = file
         user.save()
-        return Response({"detail": "Аватар загружен."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Аватар загружен."},
+                        status=status.HTTP_200_OK
+                        )
 
     def get_permissions(self):
         if self.action == 'create':
@@ -86,6 +94,15 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Tags.objects.all()
     serializer_class = TagSerializer
+
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """Вьюсет для управления ингредиентами рецептов."""
+
+    queryset = Ingredients.objects.all()
+    serializer_class = IngredientSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    filterset_class = IngredientFilter
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
