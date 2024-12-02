@@ -3,11 +3,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+from core.paginations import ApiPagination
 from core.permissions import IsAdminOrReadOnly
-from recipes.models import Favorites
+from recipes.models import Favorites, Tags
 from users.models import FoodgramUser
 
-from .serializers import FavoriteSerializer, FoodgramUserSerializer
+from .serializers import FavoriteSerializer, FoodgramUserSerializer, TagSerializer
 
 
 class FoodgramUserViewSet(viewsets.ModelViewSet):
@@ -20,6 +21,7 @@ class FoodgramUserViewSet(viewsets.ModelViewSet):
     search_fields = ("username",)
     http_method_names = ("get", "post", "patch", "delete")
     lookup_field = "id"
+    pagination_class = ApiPagination
 
     @action(
         detail=False,
@@ -51,7 +53,7 @@ class FoodgramUserViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        methods=("get","post", "delete", "patch"),
+        methods=("get", "post", "delete", "patch"),
         permission_classes=(IsAuthenticated,),
         url_path='me/avatar'
     )
@@ -72,6 +74,18 @@ class FoodgramUserViewSet(viewsets.ModelViewSet):
             self.permission_classes = (
                 IsAuthenticatedOrReadOnly, IsAdminOrReadOnly)
         return super(FoodgramUserViewSet, self).get_permissions()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """Вьюсет для управления тегами рецептов."""
+
+    queryset = Tags.objects.all()
+    serializer_class = TagSerializer
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):

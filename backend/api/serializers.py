@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from recipes.models import (Favorites, Ingredients, IngredientsForRecipe,
                             Recipes, ShoppingCart, Tags)
-from users.models import FoodgramUser
+from users.models import FoodgramUser, Subscription
 
 
 class Base64ImageField(serializers.ImageField):
@@ -21,13 +21,13 @@ class Base64ImageField(serializers.ImageField):
 
 class FoodgramUserSerializer(serializers.ModelSerializer):
     """Сериализатор пользователей"""
-    # password = serializers.CharField(write_only=True, required=True)
     avatar = Base64ImageField(required=False, allow_null=True)
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = FoodgramUser
         fields = ('email', 'id', 'username',
-                  'first_name', 'last_name', 'avatar')
+                  'first_name', 'last_name', 'is_subscribed', 'avatar')
 
     def create(self, validated_data):
         user = FoodgramUser(
@@ -37,6 +37,14 @@ class FoodgramUserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+    def get_is_subscribed(self, obj):
+        """Проверка подписки на автора."""
+        
+        user = self.context['request'].user
+        if user.is_authenticated:
+            return Subscription.objects.filter(user=user, author=obj).exists()
+        return False
 
 
 class TagSerializer(serializers.ModelSerializer):
