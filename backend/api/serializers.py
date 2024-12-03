@@ -181,7 +181,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     @ transaction.atomic
     def create(self, validated_data):
-        print('################################', validated_data)
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
             validated_data['author'] = request.user
@@ -194,25 +193,23 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         self.create_ingredient(ingredients, recipe)
         return recipe
 
-    # def update(self, instance, validated_data):
-    #     Ingredient_data = validated_data.pop('Ingredient', None)
-    #     tags_data = validated_data.pop('tags', None)
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        ingredients = validated_data.pop('ingredients', None)
+        tags = validated_data.pop('tags', None)
 
-    #     instance = super().update(instance, validated_data)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        if tags is not None:
+            instance.tags.set(tags)
 
-    #     if Ingredient_data is not None:
-    #         instance.recipe_Ingredient.all().delete()
-    #         for ingredient in Ingredient_data:
-    #             IngredientForRecipe.objects.create(
-    #                 recipe=instance,
-    #                 ingredient_id=ingredient['id'],
-    #                 amount=ingredient['amount']
-    #             )
+        if ingredients is not None:
+            instance.ingredients.clear()
+            self.create_ingredient(ingredients, instance)
 
-    #     if tags_data is not None:
-    #         instance.tags.set(tags_data)
-
-    #     return instance
+        instance.save()
+        return instance
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

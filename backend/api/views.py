@@ -157,11 +157,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         if request.user != instance.author:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = self.get_serializer(
+        write_serializer = self.get_serializer(
             instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
+        write_serializer.is_valid(raise_exception=True)
+        recipe = write_serializer.save()
+        read_serializer = RecipeReadSerializer(
+            recipe, context={'request': request})
+        return Response(read_serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -170,8 +172,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['get'])
-    def get_link(self, request, pk=None):
-        recipe = self.get_object()
-        short_link = f"https://clck.ru//{pk}"
-        return Response({'short_link': short_link})
+    # @action(detail=True, methods=['get'])
+    # def get_link(self, request, pk=None):
+    #     recipe = self.get_object()
+    #     short_link = f"https://clck.ru//{pk}"
+    #     return Response({'short_link': short_link})
