@@ -2,7 +2,7 @@ import csv
 
 from django.core.management.base import BaseCommand
 
-from recipes.models import Ingredients
+from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
@@ -12,8 +12,8 @@ class Command(BaseCommand):
         imports = {
             "ingredients": {
                 "file_path": "/data/ingredients.csv",
-                "model": Ingredients,
-                "process_row": self.process_ingridient_row,
+                "model": Ingredient,
+                "process_row": self.process_ingredient_row,
             },
         }
 
@@ -28,7 +28,7 @@ class Command(BaseCommand):
             for row in reader:
                 process_row(row, model)
 
-    def process_ingridient_row(self, row, model):
+    def process_ingredient_row(self, row, model):
         model.objects.create(
             name=row["name"],
             measurement_unit=row["measurement_unit"]

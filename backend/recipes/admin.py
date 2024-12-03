@@ -1,33 +1,33 @@
 from django.contrib import admin
 
-from .models import (Favorites,
-                     Ingredients,
-                     IngredientsForRecipe,
-                     Recipes,
+from .models import (Favorite,
+                     Ingredient,
+                     IngredientForRecipe,
+                     Recipe,
                      ShoppingCart,
-                     Tags)
+                     Tag)
 
 
-@admin.register(Tags)
-class TagsAdmin(admin.ModelAdmin):
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     search_fields = ('name',)
     prepopulated_fields = {'slug': ('name',)}
 
 
-@admin.register(Ingredients)
-class IngredientsAdmin(admin.ModelAdmin):
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
     search_fields = ('name',)
 
 
 class IngredientsInline(admin.TabularInline):
-    model = IngredientsForRecipe
+    model = IngredientForRecipe
     extra = 1
 
 
-@admin.register(Recipes)
-class RecipesAdmin(admin.ModelAdmin):
+@admin.register(Recipe)
+class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'total_favorites')
     list_filter = ('author__username', 'name', 'tags__slug')
     search_fields = ('name', 'author__username', 'tags__slug')
@@ -37,13 +37,13 @@ class RecipesAdmin(admin.ModelAdmin):
     def total_favorites(self, obj):
         """Отображает сколько раз добавили в избранное рецептов."""
 
-        return Favorites.objects.filter(recipe=obj).count()
+        return Favorite.objects.filter(recipe=obj).count()
 
     total_favorites.short_description = 'Всего добавлено в избранное'
 
 
-@admin.register(Favorites)
-class FavoritesAdmin(admin.ModelAdmin):
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe')
     search_fields = ('user__username', 'recipe__name')
 

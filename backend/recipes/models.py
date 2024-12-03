@@ -4,7 +4,7 @@ from core.validators import RecipeValidators
 from users.models import FoodgramUser
 
 
-class Tags(models.Model):
+class Tag(models.Model):
     """Модель тегов."""
 
     name = models.CharField(max_length=32, unique=True, verbose_name="Тэг")
@@ -23,7 +23,7 @@ class Tags(models.Model):
         return self.name
 
 
-class Ingredients(models.Model):
+class Ingredient(models.Model):
     """Модель ингредиентов."""
 
     name = models.CharField(
@@ -41,7 +41,7 @@ class Ingredients(models.Model):
         return self.name
 
 
-class Recipes(models.Model):
+class Recipe(models.Model):
     """Модель рецепта."""
 
     author = models.ForeignKey(
@@ -51,14 +51,14 @@ class Recipes(models.Model):
         verbose_name="Автор рецепта",
     )
     ingredients = models.ManyToManyField(
-        Ingredients,
-        through="IngredientsForRecipe",
+        Ingredient,
+        through="IngredientForRecipe",
         related_name="recipes",
         verbose_name="Ингредиенты",
         help_text="Выберите ингредиенты",
     )
     tags = models.ManyToManyField(
-        Tags, verbose_name="Теги", help_text="Выберите теги")
+        Tag, verbose_name="Теги", help_text="Выберите теги")
     image = models.ImageField(
         upload_to="media/",
         verbose_name="Изображение",
@@ -90,18 +90,18 @@ class Recipes(models.Model):
         return f'Рецепт {self.name}, автор {self.author}'
 
 
-class IngredientsForRecipe(models.Model):
+class IngredientForRecipe(models.Model):
     """Модель для связи между ингредиентами и рецептами."""
 
     recipe = models.ForeignKey(
-        Recipes,
+        Recipe,
         on_delete=models.CASCADE,
         related_name='recipe_ingredients',
     )
     ingredient = models.ForeignKey(
-        Ingredients,
+        Ingredient,
         on_delete=models.CASCADE,
-        related_name='ingredients_list',
+        related_name='recipe_ingredients',
     )
     amount = models.PositiveSmallIntegerField(
         'Количество',
@@ -119,7 +119,7 @@ class IngredientsForRecipe(models.Model):
         verbose_name_plural = 'Ингредиенты рецептов'
 
 
-class Favorites(models.Model):
+class Favorite(models.Model):
     """Модель для сохранения избранных рецептов."""
 
     user = models.ForeignKey(
@@ -129,7 +129,7 @@ class Favorites(models.Model):
     )
 
     recipe = models.ForeignKey(
-        Recipes,
+        Recipe,
         on_delete=models.CASCADE,
         verbose_name="Рецепт",
     )
@@ -157,7 +157,7 @@ class ShoppingCart(models.Model):
         help_text='Список покупок пользователя'
     )
     recipe = models.ForeignKey(
-        Recipes,
+        Recipe,
         on_delete=models.CASCADE,
         related_name='shopping_cart',
     )

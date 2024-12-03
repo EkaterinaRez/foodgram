@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from core.filters import IngredientFilter, RecipeFilter
 from core.paginations import ApiPagination
 from core.permissions import IsAdminOrReadOnly
-from recipes.models import Favorites, Ingredients, Tags, Recipes
+from recipes.models import Favorite, Ingredient, Tag, Recipe
 from .serializers import (FavoriteSerializer,
                           FoodgramUserSerializer,
                           IngredientSerializer,
@@ -98,7 +98,7 @@ class FoodgramUserViewSet(viewsets.ModelViewSet):
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для управления тегами рецептов."""
 
-    queryset = Tags.objects.all()
+    queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (AllowAny,)
 
@@ -106,7 +106,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для управления ингредиентами рецептов."""
 
-    queryset = Ingredients.objects.all()
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     filterset_class = IngredientFilter
@@ -116,7 +116,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class FavoriteViewSet(viewsets.ModelViewSet):
     """Вьюсет для управления избранными рецептами."""
 
-    queryset = Favorites.objects.all()
+    queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
 
     def get_queryset(self):
@@ -129,10 +129,12 @@ class FavoriteViewSet(viewsets.ModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для управления рецептами."""
 
-    queryset = Recipes.objects.all()
+    queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly,)
     filterset_class = RecipeFilter
     pagination_class = ApiPagination
+
+    
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
