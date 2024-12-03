@@ -134,7 +134,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
     pagination_class = ApiPagination
 
-    
+    # def get_serializer_context(self):
+    #     context = super().get_serializer_context()
+    #     context['request'] = self.request
+    #     return context
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -145,7 +148,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if not request.user.is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-        return super().create(request, *args, **kwargs)
+        write_serializer = self.get_serializer(data=request.data)
+        write_serializer.is_valid(raise_exception=True)
+        recipe = write_serializer.save()
+
+        read_serializer = RecipeReadSerializer(
+            recipe, context={'request': request})
+        return Response(read_serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)

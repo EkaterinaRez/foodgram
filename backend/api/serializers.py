@@ -71,7 +71,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit')
 
 
-class IngredientForRecipeserializer(serializers.ModelSerializer):
+class IngredientForRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор ингредиентов для рецепта."""
     id = serializers.IntegerField(source='ingredient.id', read_only=True)
     name = serializers.CharField(source='ingredient.name', read_only=True)
@@ -96,8 +96,8 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериализатор для метода get рецепта."""
 
-    author = FoodgramUserSerializer(read_only=True)
-    ingredients = IngredientForRecipeserializer(
+    author = serializers.SerializerMethodField()
+    ingredients = IngredientForRecipeSerializer(
         source='recipe_ingredients', many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     is_favorited = serializers.SerializerMethodField()
@@ -110,6 +110,27 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             'id', 'tags', 'author', 'ingredients', 'is_favorited',
             'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
         )
+
+    def get_author(self, obj):
+        """Определяем поля для вывода об авторе рецепта."""
+
+        user = obj.author
+        request_user = self.context['request'].user
+        is_subscribed = False
+
+        if request_user.is_authenticated:
+            is_subscribed = user.subscribers.filter(
+                id=request_user.id).exists()
+
+        return {
+            "email": user.email,
+            "id": user.id,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "is_subscribed": is_subscribed,
+            "avatar": user.avatar.url if user.avatar else None
+        }
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
