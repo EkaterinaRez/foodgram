@@ -58,7 +58,10 @@ class Recipe(models.Model):
         help_text="Выберите ингредиенты",
     )
     tags = models.ManyToManyField(
-        Tag, verbose_name="Теги", help_text="Выберите теги")
+        Tag, verbose_name="Теги",
+        help_text="Выберите теги",
+        related_name='recipes'
+    )
     image = models.ImageField(
         upload_to="media/",
         verbose_name="Изображение",

@@ -1,4 +1,4 @@
-
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
@@ -131,6 +131,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     permission_classes = (AllowAny,)
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = ApiPagination
 
