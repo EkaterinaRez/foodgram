@@ -130,14 +130,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для управления рецептами."""
 
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
     filterset_class = RecipeFilter
     pagination_class = ApiPagination
-
-    # def get_serializer_context(self):
-    #     context = super().get_serializer_context()
-    #     context['request'] = self.request
-    #     return context
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):

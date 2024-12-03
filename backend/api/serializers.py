@@ -13,7 +13,6 @@ class Base64ImageField(serializers.ImageField):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
-
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
 
         return super().to_internal_value(data)
@@ -73,24 +72,17 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class IngredientForRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор ингредиентов для рецепта."""
-    id = serializers.IntegerField(source='ingredient.id', read_only=True)
+
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all())
     name = serializers.CharField(source='ingredient.name', read_only=True)
     measurement_unit = serializers.CharField(
         source='ingredient.measurement_unit', read_only=True)
-
-    class Meta:
-        model = IngredientForRecipe
-        fields = ('id', 'name', 'measurement_unit', 'amount')
-
-
-class IngredientAmountSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredient.objects.all())
     amount = serializers.IntegerField()
 
     class Meta:
         model = IngredientForRecipe
-        fields = ('id', 'amount')
+        fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
@@ -134,17 +126,21 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
+        if not user.is_authenticated:
+            return False
         return Favorite.objects.filter(user=user, recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context['request'].user
+        if not user.is_authenticated:
+            return False
         return ShoppingCart.objects.filter(user=user, recipe=obj).exists()
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
     """Сериализатор для методов post/patch/put/delete рецепта."""
 
-    ingredients = IngredientAmountSerializer(many=True, write_only=True)
+    ingredients = IngredientForRecipeSerializer(many=True, write_only=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True)
     image = Base64ImageField(write_only=True, allow_null=True)
