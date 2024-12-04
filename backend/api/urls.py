@@ -9,6 +9,7 @@ from api.views import (FavoriteViewSet,
                        TagViewSet,
                        RecipeViewSet)
 
+
 api_router = DefaultRouter()
 api_router.register('tags', TagViewSet, basename='tags')
 api_router.register('ingredients', IngredientViewSet, basename='ingredients')
@@ -20,6 +21,7 @@ urlpatterns_detail = [
     path('', include(api_router.urls)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
+
 ]
 urlpatterns = [
     path('', include(urlpatterns_detail)),

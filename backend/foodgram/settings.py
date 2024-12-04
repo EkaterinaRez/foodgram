@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "api.apps.ApiConfig",
     "recipes.apps.RecipesConfig",
     "users.apps.UsersConfig",
+    "shortlink.apps.ShortlinkConfig",
 ]
 
 MIDDLEWARE = [
@@ -120,3 +121,6 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ] 
 CORS_URLS_REGEX = r'^/api/.*$'
+
+
+DOMAIN_URL = 'http://example.com'

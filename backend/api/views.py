@@ -1,3 +1,4 @@
+from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
@@ -8,15 +9,12 @@ from rest_framework.response import Response
 from core.filters import IngredientFilter, RecipeFilter
 from core.paginations import ApiPagination
 from core.permissions import IsAdminOrReadOnly
-from recipes.models import Favorite, Ingredient, Tag, Recipe
-from .serializers import (FavoriteSerializer,
-                          FoodgramUserSerializer,
-                          IngredientSerializer,
-                          RecipeReadSerializer,
-                          RecipeWriteSerializer,
-                          TagSerializer
-                          )
+from recipes.models import Favorite, Ingredient, Recipe, Tag
+from shortlink.models import UrlShort
 from users.models import FoodgramUser
+from .serializers import (FavoriteSerializer, FoodgramUserSerializer,
+                          IngredientSerializer, RecipeReadSerializer,
+                          RecipeWriteSerializer, TagSerializer)
 
 
 class FoodgramUserViewSet(viewsets.ModelViewSet):
@@ -155,8 +153,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         if request.user != instance.author:
             return Response(status=status.HTTP_403_FORBIDDEN)
+        
         write_serializer = self.get_serializer(
             instance, data=request.data, partial=partial)
         write_serializer.is_valid(raise_exception=True)
@@ -172,8 +174,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # @action(detail=True, methods=['get'])
-    # def get_link(self, request, pk=None):
-    #     recipe = self.get_object()
-    #     short_link = f"https://clck.ru//{pk}"
-    #     return Response({'short_link': short_link})
+    @action(detail=True, methods=['get'], url_path='get-link')
+    def get_link(self, request, pk=None):
+        base_url = getattr(settings, 'DOMAIN_URL', 'http://localhost:8000')
+        long_url = f'/api/recipes/{pk}/'
+        url_short, created = UrlShort.objects.get_or_create(
+            long_url=long_url)
+        short_url = f"{base_url}/s/{url_short.short_url}"
+        return Response({"short-link": short_url})

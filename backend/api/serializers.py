@@ -161,22 +161,33 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
                 amount=amount
             )
 
-    def validate_ingredient(self, value):
+    def validate_ingredients(self, value):
         if not value:
             raise serializers.ValidationError(
                 "Необходимо указать хотя бы один ингредиент.")
-        unique_Ingredient = set()
+
+        unique_ingredient = set()
         for item in value:
-            if item['ingredient'] in unique_Ingredient:
+            if item['amount'] <= 0:
+                raise serializers.ValidationError(
+                    "Количество ингредиентов должно быть больше нуля.")
+
+            if item['id'] in unique_ingredient:
                 raise serializers.ValidationError(
                     "Ингредиенты должны быть уникальными.")
-            unique_Ingredient.add(item['ingredient'])
+            unique_ingredient.add(item['id'])
         return value
 
     def validate_tags(self, value):
         if not value:
             raise serializers.ValidationError(
                 "Необходимо указать хотя бы один тег.")
+        unique_tags = set()
+        for item in value:
+            if item in unique_tags:
+                raise serializers.ValidationError(
+                    "Теги должны быть уникальными.")
+            unique_tags.add(item)
         return value
 
     @ transaction.atomic
@@ -200,13 +211,19 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        
+
         if tags is not None:
             instance.tags.set(tags)
+        else:
+            raise serializers.ValidationError(
+                "Укажите теги.")
 
         if ingredients is not None:
             instance.ingredients.clear()
             self.create_ingredient(ingredients, instance)
+        else:
+            raise serializers.ValidationError(
+                "Укажите ингредиенты.")
 
         instance.save()
         return instance
