@@ -12,10 +12,11 @@ from core.paginations import ApiPagination
 from core.permissions import IsAdminOrReadOnly
 from recipes.models import Favorite, Ingredient, Recipe, Tag
 from shortlink.models import UrlShort
-from users.models import FoodgramUser
+from users.models import FoodgramUser, Subscription
 from .serializers import (FavoriteSerializer, FoodgramUserSerializer,
                           IngredientSerializer, RecipeReadSerializer,
-                          RecipeWriteSerializer, TagSerializer)
+                          RecipeWriteSerializer, TagSerializer,
+                          SubscriptionSerializer)
 
 
 class FoodgramUserViewSet(viewsets.ModelViewSet):
@@ -174,6 +175,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post', 'delete'], url_path='favorite')
     def favorite(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         user = request.user
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
         serializer_context = {
@@ -200,9 +203,71 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     user=user, recipe=recipe
             ).exists():
                 return Response(
-                    status=status.HTTP_404_NOT_FOUND
+                    status=status.HTTP_400_BAD_REQUEST
                 )
             Favorite.objects.get(recipe=recipe).delete()
             return Response(
                 status=status.HTTP_204_NO_CONTENT
             )
+
+
+class SubscriptionViewSet(viewsets.ViewSet):
+    """Вьюсет для управления подписками на авторов."""
+    permission_classes = (IsAuthenticated,)
+
+    @action(detail=True,
+            methods=['post'],
+            url_path='subscribe')
+    def subscribe(self, request, id=None):
+        """Добавляем подписку."""
+
+        author = get_object_or_404(FoodgramUser, id=id)
+        user = request.user
+        if Subscription.objects.filter(user=user, author=author).exists():
+            return Response(
+                {"detail": "Такая подписка уже существует."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if author == user:
+            return Response(
+                {"detail": "Подписаться на себя нельзя(хоть и хочется)."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        subscription = Subscription.objects.create(user=user, author=author)
+        serializer = SubscriptionSerializer(
+            subscription, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True,
+            methods=['delete'],
+            url_path='subscribe')
+    def unsubscribe(self, request, id=None):
+        """Удаляем подписку."""
+
+        author = get_object_or_404(FoodgramUser, id=id)
+        user = request.user
+
+        subscription = Subscription.objects.filter(
+            user=user, author=author).first()
+        if subscription:
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+            {"detail": "Подписка не найдена."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @action(detail=False,
+            methods=['get'],
+            url_path='subscriptions')
+    def list_subscriptions(self, request):
+        """Получаем свой список подписок."""
+
+        user = request.user
+        subscriptions = Subscription.objects.filter(user=user)
+        serializer = SubscriptionSerializer(
+            subscriptions, many=True, context={'request': request}
+        )
+        return Response(serializer.data)

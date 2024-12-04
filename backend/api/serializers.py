@@ -1,6 +1,8 @@
 import base64
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.http import JsonResponse
 from rest_framework import serializers
 
 from recipes.models import (Favorite, Ingredient, IngredientForRecipe,
@@ -261,12 +263,73 @@ class FavoriteSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class SubscriptionSerializer(serializers.ModelSerializer):
+    """Сериализатор подписки на авторов."""
+
+    email = serializers.ReadOnlyField(source='author.email')
+    id = serializers.ReadOnlyField(source='author.id')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Subscription
+        fields = ('email', 'id', 'username', 'first_name',
+                  'last_name', 'is_subscribed', 'recipes',
+                  'recipes_count', 'avatar'
+                  )
+
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+
+        return Subscription.objects.filter(
+            user=obj.user,
+            author=obj.author
+        ).exists()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        recipes = Recipe.objects.filter(author=obj.author)
+
+        if limit:
+            limit = int(limit)
+            recipes = recipes[:limit]
+
+        recipes_list = [
+            {
+                "id": recipe.id,
+                "name": recipe.name,
+                "image": request.build_absolute_uri(recipe.image.url),
+                "cooking_time": recipe.cooking_time
+            }
+            for recipe in recipes
+        ]
+
+        return recipes_list
+
+    def get_recipes_count(self, obj):
+        return Recipe.objects.filter(author=obj.author).count()
+
+    def get_avatar(self, obj):
+        if obj.author.avatar:
+            return f"{settings.MEDIA_URL}{obj.author.avatar}"
+        return None
+
+
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    recipe= serializers.SlugRelatedField(
-        queryset = Recipe.objects.all(),
-        slug_field = 'name'
+    recipe = serializers.SlugRelatedField(
+        queryset=Recipe.objects.all(),
+        slug_field='name'
     )
 
     class Meta:
-        model= ShoppingCart
-        fields= ('id', 'user', 'recipe')
+        model = ShoppingCart
+        fields = ('id', 'user', 'recipe')
+
