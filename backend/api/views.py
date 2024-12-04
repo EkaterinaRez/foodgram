@@ -1,7 +1,7 @@
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -211,9 +211,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
 
 
-class SubscriptionViewSet(viewsets.ViewSet):
+class SubscriptionViewSet(mixins.CreateModelMixin,
+                          mixins.DestroyModelMixin,
+                          mixins.ListModelMixin,
+                          viewsets.GenericViewSet):
     """Вьюсет для управления подписками на авторов."""
-    permission_classes = (IsAuthenticated,)
+    pagination_class = ApiPagination
 
     @action(detail=True,
             methods=['post'],
@@ -267,7 +270,16 @@ class SubscriptionViewSet(viewsets.ViewSet):
 
         user = request.user
         subscriptions = Subscription.objects.filter(user=user)
+
+        page = self.paginate_queryset(subscriptions)
+        if page is not None:
+            serializer = SubscriptionSerializer(
+                page, many=True, context={'request': request}
+            )
+            return self.get_paginated_response(serializer.data)
+
         serializer = SubscriptionSerializer(
             subscriptions, many=True, context={'request': request}
         )
+
         return Response(serializer.data)

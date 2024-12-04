@@ -22,12 +22,12 @@ users_subscribe_view = SubscriptionViewSet.as_view({'post': 'subscribe'})
 
 
 urlpatterns_detail = [
-    path('', include(api_router.urls)),
-    path('auth/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.authtoken')),
     path('users/subscriptions/', users_subscriptions_view,
          name='subscriptions'),
     path('users/<int:id>/subscribe/', users_subscribe_view, name='subscribe'),
+    path('', include(api_router.urls)),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
 ]
 
 urlpatterns = [
