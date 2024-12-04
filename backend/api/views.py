@@ -1,5 +1,6 @@
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
@@ -106,22 +107,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
     filterset_class = IngredientFilter
     permission_classes = (AllowAny,)
-
-
-class FavoriteViewSet(viewsets.ModelViewSet):
-    """Вьюсет для управления избранными рецептами."""
-
-    queryset = Favorite.objects.all()
-    serializer_class = FavoriteSerializer
-
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -158,7 +145,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         if request.user != instance.author:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        
+
         write_serializer = self.get_serializer(
             instance, data=request.data, partial=partial)
         write_serializer.is_valid(raise_exception=True)
@@ -169,6 +156,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         if request.user != instance.author:
             return Response(status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
@@ -182,3 +171,38 @@ class RecipeViewSet(viewsets.ModelViewSet):
             long_url=long_url)
         short_url = f"{base_url}/s/{url_short.short_url}"
         return Response({"short-link": short_url})
+
+    @action(detail=True, methods=['post', 'delete'], url_path='favorite')
+    def favorite(self, request, *args, **kwargs):
+        user = request.user
+        recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
+        serializer_context = {
+            'request': request,
+            'view': self,
+        }
+
+        if request.method == 'POST':
+            serializer = FavoriteSerializer(
+                data=request.data,
+                context=serializer_context
+            )
+            if serializer.is_valid(raise_exception=True):
+                serializer.save(user=user, recipe=recipe)
+                return Response(serializer.data,
+                                status=status.HTTP_201_CREATED
+                                )
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST
+                            )
+
+        if request.method == 'DELETE':
+            if not Favorite.objects.filter(
+                    user=user, recipe=recipe
+            ).exists():
+                return Response(
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            Favorite.objects.get(recipe=recipe).delete()
+            return Response(
+                status=status.HTTP_204_NO_CONTENT
+            )

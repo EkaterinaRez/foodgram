@@ -231,25 +231,42 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор избранных рецептов."""
-    user = serializers.SlugRelatedField(
-        slug_field='username', queryset=FoodgramUser.objects.all()
-    )
-    recipe = serializers.SlugRelatedField(
-        queryset=Recipe.objects.all(),
-        slug_field='name'
-    )
+
+    id = serializers.PrimaryKeyRelatedField(
+        source='recipe',
+        read_only=True)
+    name = serializers.ReadOnlyField(
+        source='recipe.name',
+        read_only=True)
+    image = serializers.ImageField(
+        source='recipe.image',
+        read_only=True)
+    cooking_time = serializers.IntegerField(
+        source='recipe.cooking_time',
+        read_only=True)
 
     class Meta:
         model = Favorite
-        fields = ('id', 'user', 'recipe')
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        recipe_id = self.context['view'].kwargs.get('pk')
+
+        if Favorite.objects.filter(
+                user=user,
+                recipe_id=recipe_id).exists():
+            raise serializers.ValidationError({'id': 'Рецепт уже добавлен!'})
+
+        return attrs
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    recipe = serializers.SlugRelatedField(
-        queryset=Recipe.objects.all(),
-        slug_field='name'
+    recipe= serializers.SlugRelatedField(
+        queryset = Recipe.objects.all(),
+        slug_field = 'name'
     )
 
     class Meta:
-        model = ShoppingCart
-        fields = ('id', 'user', 'recipe')
+        model= ShoppingCart
+        fields= ('id', 'user', 'recipe')
