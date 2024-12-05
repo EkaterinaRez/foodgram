@@ -1,4 +1,5 @@
-from rest_framework import permissions
+from rest_framework import permissions, status
+from rest_framework.response import Response
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -11,6 +12,17 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return request.user.is_authenticated and (
-            request.user.role == 'admin' or request.user.is_superuser
-        )
+        return request.user.is_authenticated and request.user.is_superuser
+
+
+class IsAuthenticatedOr401(permissions.BasePermission):
+    """Позволяет доступ только аутентифицированным пользователям."""
+
+    def has_permission(self, request, view):
+        is_authenticated = request.user and request.user.is_authenticated
+        if not is_authenticated:
+            Response(
+                {"detail": "Аутентификация не выполнена."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        return is_authenticated

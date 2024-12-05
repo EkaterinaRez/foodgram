@@ -1,12 +1,13 @@
 import base64
+
 from django.conf import settings
+from django.contrib.auth.password_validation import validate_password
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.http import JsonResponse
-from rest_framework import serializers
 
-from recipes.models import (Favorite, Ingredient, IngredientForRecipe,
-                            Recipe, ShoppingCart, Tag)
+from recipes.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
+                            ShoppingCart, Tag)
+from rest_framework import serializers
 from users.models import FoodgramUser, Subscription
 
 
@@ -54,6 +55,23 @@ class FoodgramUserSerializer(serializers.ModelSerializer):
             represent.pop('avatar', None)
 
         return represent
+
+
+class PasswordChangeSerializer(serializers.Serializer):
+    """Сериализатор для смены пароля."""
+
+    new_password = serializers.CharField(required=True, write_only=True)
+    current_password = serializers.CharField(required=True, write_only=True)
+
+    def validate_current_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError('Неправильный старый пароль.')
+        return value
+
+    def validate_new_password(self, value):
+        validate_password(value, self.context['request'].user)
+        return value
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -314,6 +332,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
         return recipes_list
 
+
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
 
@@ -332,4 +351,3 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = ('id', 'user', 'recipe')
-

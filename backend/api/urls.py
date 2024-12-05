@@ -18,13 +18,14 @@ api_router.register(r'users', FoodgramUserViewSet, basename='users')
 
 users_subscriptions_view = SubscriptionViewSet.as_view(
     {'get': 'list_subscriptions'})
-users_subscribe_view = SubscriptionViewSet.as_view({'post': 'subscribe'})
-
+users_subscribe_view = SubscriptionViewSet.as_view(
+    {'post': 'subscribe', 'delete': 'subscribe'}
+)
 
 urlpatterns_detail = [
+    path('users/<int:id>/subscribe/', users_subscribe_view, name='subscribe'),
     path('users/subscriptions/', users_subscriptions_view,
          name='subscriptions'),
-    path('users/<int:id>/subscribe/', users_subscribe_view, name='subscribe'),
     path('', include(api_router.urls)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),

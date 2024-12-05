@@ -36,7 +36,7 @@ class FoodgramUser(AbstractUser):
         max_length=128,
         help_text="Пароль должен быть надежным.",
     )
-    avatar = models.ImageField(upload_to='avatar/', null=True, blank=True)
+    avatar = models.ImageField(upload_to='media/users/', null=True, blank=True)
 
     class Meta:
         verbose_name = "Пользователь"
