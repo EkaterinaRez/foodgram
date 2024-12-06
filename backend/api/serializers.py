@@ -108,12 +108,14 @@ class IngredientForRecipeSerializer(serializers.ModelSerializer):
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериализатор для метода get рецепта."""
 
-    author = serializers.SerializerMethodField()
+    author = FoodgramUserSerializer(read_only=True)
     ingredients = IngredientForRecipeSerializer(
         source='recipe_ingredients', many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.BooleanField(default=False, read_only=True)
+    is_in_shopping_cart = serializers.BooleanField(
+        default=False, read_only=True
+    )
     image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -123,38 +125,26 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
         )
 
-    def get_author(self, obj):
-        """Определяем поля для вывода об авторе рецепта."""
+    # def get_author(self, obj):
+    #     """Определяем поля для вывода об авторе рецепта."""
 
-        user = obj.author
-        request_user = self.context['request'].user
-        is_subscribed = False
+    #     user = obj.author
+    #     request_user = self.context['request'].user
+    #     is_subscribed = False
 
-        if request_user.is_authenticated:
-            is_subscribed = user.subscribers.filter(
-                id=request_user.id).exists()
+    #     if request_user.is_authenticated:
+    #         is_subscribed = user.subscribers.filter(
+    #             id=request_user.id).exists()
 
-        return {
-            "email": user.email,
-            "id": user.id,
-            "username": user.username,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "is_subscribed": is_subscribed,
-            "avatar": user.avatar.url if user.avatar else None
-        }
-
-    def get_is_favorited(self, obj):
-        user = self.context['request'].user
-        if not user.is_authenticated:
-            return False
-        return Favorite.objects.filter(user=user, recipe=obj).exists()
-
-    def get_is_in_shopping_cart(self, obj):
-        user = self.context['request'].user
-        if not user.is_authenticated:
-            return False
-        return ShoppingCart.objects.filter(user=user, recipe=obj).exists()
+    #     return {
+    #         "email": user.email,
+    #         "id": user.id,
+    #         "username": user.username,
+    #         "first_name": user.first_name,
+    #         "last_name": user.last_name,
+    #         "is_subscribed": is_subscribed,
+    #         "avatar": user.avatar.url if user.avatar else None
+    #     }
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
