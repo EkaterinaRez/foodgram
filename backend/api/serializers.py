@@ -332,7 +332,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
         return recipes_list
 
-
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
 
@@ -343,11 +342,21 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    recipe = serializers.SlugRelatedField(
-        queryset=Recipe.objects.all(),
-        slug_field='name'
-    )
+    """Сериализатор корзины."""
+
+    id = serializers.PrimaryKeyRelatedField(
+        source='recipe',
+        read_only=True)
+    name = serializers.ReadOnlyField(
+        source='recipe.name',
+        read_only=True)
+    image = serializers.ImageField(
+        source='recipe.image',
+        read_only=True)
+    cooking_time = serializers.IntegerField(
+        source='recipe.cooking_time',
+        read_only=True)
 
     class Meta:
         model = ShoppingCart
-        fields = ('id', 'user', 'recipe')
+        fields = ('id', 'name', 'image', 'cooking_time')

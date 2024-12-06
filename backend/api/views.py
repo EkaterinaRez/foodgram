@@ -1,21 +1,27 @@
-from core.filters import IngredientFilter, RecipeFilter
-from core.paginations import ApiPagination
-from core.permissions import IsAdminOrReadOnly, IsAuthenticatedOr401
 from django.conf import settings
+from django.http import HttpResponse
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Favorite, Ingredient, Recipe, Tag
+# from django_filters.rest_framework import DjangoFilterBackend
+from reportlab.pdfgen import canvas
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+
+from core.filters import IngredientFilter, RecipeFilter
+from core.paginations import ApiPagination
+from core.permissions import IsAuthenticatedOr401
+from recipes.models import (Favorite, Ingredient,
+                            IngredientForRecipe, Recipe,
+                            ShoppingCart, Tag)
 from shortlink.models import UrlShort
 from users.models import FoodgramUser, Subscription
-
 from .serializers import (FavoriteSerializer, FoodgramUserSerializer,
                           IngredientSerializer, PasswordChangeSerializer,
                           RecipeReadSerializer, RecipeWriteSerializer,
-                          SubscriptionSerializer, TagSerializer)
+                          SubscriptionSerializer, ShoppingCartSerializer,
+                          TagSerializer)
 
 
 class FoodgramUserViewSet(viewsets.ModelViewSet):
@@ -23,7 +29,7 @@ class FoodgramUserViewSet(viewsets.ModelViewSet):
 
     queryset = FoodgramUser.objects.all()
     serializer_class = FoodgramUserSerializer
-    permission_classes = (IsAuthenticatedOr401, IsAdminOrReadOnly)
+    permission_classes = (AllowAny,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ("username",)
     http_method_names = ("get", "post", "put", "delete")
@@ -147,7 +153,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     permission_classes = (AllowAny,)
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (filters.SearchFilter,)
     filterset_class = RecipeFilter
     pagination_class = ApiPagination
 
@@ -243,6 +249,84 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_204_NO_CONTENT
             )
 
+    @action(detail=True,
+            methods=['post', 'delete'],
+            url_path='shopping_cart'
+            )
+    def shopping_cart(self, request, pk=None):
+        """Добавление и удаление рецепта в корзине."""
+
+        if request.method == 'POST':
+            recipe = Recipe.objects.get(pk=pk)
+            if not recipe:
+                return Response(
+                    {'status': 'Рецепт не найден.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            cart_item, created = ShoppingCart.objects.get_or_create(
+                user=request.user, recipe=recipe
+            )
+            if created:
+                serializer = ShoppingCartSerializer(cart_item)
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
+            else:
+                return Response(
+                    {'status': 'Рецепт уже в корзине.'},
+                    status=status.HTTP_200_OK
+                )
+
+        if request.method == 'DELETE':
+            recipe = Recipe.objects.get(pk=pk)
+            if not cart_item:
+                return Response(
+                    {'status': 'Рецепт не найден в корзине.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            cart_item.delete()
+            return Response(
+                {'status': 'Рецепт удален из корзины.'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+
+    @action(detail=False,
+            methods=['get'],
+            url_path='download_shopping_cart'
+            )
+    def download_shopping_list(self, request):
+        """Скачивание корзины в pdf."""
+
+        user_id = request.user.id
+        ingredients = (
+            IngredientForRecipe.objects
+            .filter(recipe__shopping_cart__user_id=user_id)
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(total_amount=Sum('amount'))
+        )
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
+
+        pdf_file = canvas.Canvas(response)
+        y_position = 800
+        pdf_file.drawString(100, y_position, "Список покупок:")
+        y_position -= 25
+
+        for item in ingredients:
+            ingredient_name = item['ingredient__name']
+            measurement_unit = item['ingredient__measurement_unit']
+            total_amount = item['total_amount']
+
+            line = f"- {ingredient_name}: {total_amount} {measurement_unit}"
+            pdf_file.drawString(100, y_position, line)
+            y_position -= 20
+
+        pdf_file.save()
+        return response
+
 
 class SubscriptionViewSet(mixins.CreateModelMixin,
                           mixins.DestroyModelMixin,
@@ -251,6 +335,7 @@ class SubscriptionViewSet(mixins.CreateModelMixin,
     """Вьюсет для управления подписками на авторов."""
     pagination_class = ApiPagination
     permission_classes = (IsAuthenticatedOr401,)
+    serializer_class = SubscriptionSerializer
 
     @action(detail=True,
             methods=['post', 'delete'],

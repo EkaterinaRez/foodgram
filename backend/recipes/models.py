@@ -156,7 +156,7 @@ class ShoppingCart(models.Model):
         FoodgramUser,
         on_delete=models.CASCADE,
         related_name='shopping_cart',
-        verbose_name='Список покупок',
+        verbose_name='Пользователь',
         help_text='Список покупок пользователя'
     )
     recipe = models.ForeignKey(
