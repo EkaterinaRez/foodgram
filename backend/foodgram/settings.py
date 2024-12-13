@@ -1,14 +1,18 @@
-from datetime import timedelta
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-&x=(xf%bnama@df-#k^=09!xjhwfw@49_eost8bqq9xo5r#@*2"
+SECRET_KEY = os.getenv("SECRET_KEY", "some_fake_secret_to_pass_tests")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "false").strip().lower() == "true"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1").split(",")
 
 
 INSTALLED_APPS = [
@@ -62,8 +66,12 @@ WSGI_APPLICATION = "foodgram.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
     }
 }
 
@@ -121,6 +129,5 @@ CORS_ORIGIN_ALLOW_ALL = True
 #     'http://localhost:3000',
 # ] 
 CORS_URLS_REGEX = r'^/api/.*$'
-
 
 DOMAIN_URL = 'http://example.com'
