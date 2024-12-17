@@ -1,5 +1,5 @@
-from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 
 class UserValidators:

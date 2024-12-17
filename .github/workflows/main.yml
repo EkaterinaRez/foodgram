@@ -77,6 +77,7 @@ jobs:
     - name: Install dependencies
       run: |
         cd frontend/
+        npm install
         npm ci
 
     - name: Test frontend
@@ -123,7 +124,7 @@ jobs:
       - name: Push to DockerHub
         uses: docker/build-push-action@v4
         with:
-          context: ./nginx/
+          context: ./infra/
           push: true
           tags: ${{ secrets.USER_ALIAS }}/foodgram_gateway:latest
                

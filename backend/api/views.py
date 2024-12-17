@@ -1,21 +1,21 @@
-from core.filters import IngredientFilter, RecipeFilter
-from core.paginations import ApiPagination
-from core.permissions import IsAuthAuthorOrReadonly
 from django.conf import settings
 from django.db import models as d_models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
-                            ShoppingCart, Tag)
 from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
+from core.filters import IngredientFilter, RecipeFilter
+from core.paginations import ApiPagination
+from core.permissions import IsAuthAuthorOrReadonly
+from recipes.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
+                            ShoppingCart, Tag)
 from shortlink.models import UrlShort
 from users.models import FoodgramUser, Subscription
-
 from .serializers import (FavoriteSerializer, FoodgramUserSerializer,
                           IngredientSerializer, PasswordChangeSerializer,
                           RecipeReadSerializer, RecipeWriteSerializer,
@@ -230,7 +230,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         author=d_models.OuterRef('author'),
                         user_id=user.id,
                     )
-                ) if user.is_authenticated else d_models.Value(False, output_field=d_models.BooleanField())
+                ) if user.is_authenticated else d_models.Value(
+                    False,
+                    output_field=d_models.BooleanField()
+                )
             ),
             to_attr='subs',
         )

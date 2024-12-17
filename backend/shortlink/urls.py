@@ -1,5 +1,7 @@
 from django.urls import path
+
 from . import views
+
 
 urlpatterns = [
     path('s/<str:short_code>/', views.redirect_to_long_url,

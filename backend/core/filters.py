@@ -1,5 +1,6 @@
 from django_filters import rest_framework as filters
-from recipes.models import Favorite, Ingredient, Recipe, Tag
+
+from recipes.models import Ingredient, Recipe, Tag
 
 
 class IngredientFilter(filters.FilterSet):
@@ -13,6 +14,8 @@ class IngredientFilter(filters.FilterSet):
 
 
 class RecipeFilter(filters.FilterSet):
+    """Фильтр для рецептов."""
+
     is_favorited = filters.BooleanFilter(method='filter_is_favorited')
     is_in_shopping_cart = filters.BooleanFilter(
         method='filter_is_in_shopping_cart')
