@@ -30,7 +30,7 @@ services:
     depends_on:
       - backend
       - frontend
-    image: ekaterinarez/foogram_gateway
+    image: ekaterinarez/foodgram_gateway
     env_file: .env
     volumes:
       - static:/staticfiles/

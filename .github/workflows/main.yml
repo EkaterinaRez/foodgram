@@ -78,7 +78,7 @@ jobs:
       run: |
         cd frontend/
         npm install
-        npm ci
+        npm ci --legacy-peer-deps
 
     - name: Test frontend
       run: |
