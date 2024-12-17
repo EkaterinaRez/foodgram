@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth.password_validation import validate_password
 from django.core.files.base import ContentFile
 from django.db import transaction
-
 from recipes.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
                             ShoppingCart, Tag)
 from rest_framework import serializers
@@ -183,7 +182,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             unique_tags.add(item)
         return value
 
-    @ transaction.atomic
+    @transaction.atomic
     def create(self, validated_data):
         request = self.context.get('request')
         if request and hasattr(request, 'user'):

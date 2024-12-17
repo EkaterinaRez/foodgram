@@ -325,9 +325,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         short_url = f"{base_url}/s/{url_short.short_url}"
         return Response({"short-link": short_url})
 
-    @ action(detail=True,
-             methods=['post', 'delete'],
-             url_path='favorite')
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        url_path='favorite')
     def favorite(self, request, *args, **kwargs):
         user = request.user
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
@@ -417,7 +418,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             .annotate(total_amount=d_models.Sum('amount'))
         )
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
+        response['Content-Disposition'] = (
+            'attachment; filename="shopping_list.pdf"')
 
         pdf_file = canvas.Canvas(response)
         y_position = 800

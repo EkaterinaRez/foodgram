@@ -3,11 +3,8 @@ from django.conf.urls.static import static
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from api.views import (FoodgramUserViewSet,
-                       IngredientViewSet,
-                       TagViewSet,
-                       RecipeViewSet)
-
+from api.views import (FoodgramUserViewSet, IngredientViewSet, RecipeViewSet,
+                       TagViewSet)
 
 api_router = DefaultRouter()
 api_router.register('tags', TagViewSet, basename='tags')
