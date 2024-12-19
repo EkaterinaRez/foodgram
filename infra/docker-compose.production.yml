@@ -9,7 +9,7 @@ services:
   db:
     image: postgres:13.10
     env_file:
-      - ./.env
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - media:/app/media/
@@ -18,14 +18,14 @@ services:
       - db
     image: ekaterinarez/foodgram_backend
     env_file:
-      - ./.env
+      - .env
     volumes:
       - static:/backend_static
       - media:/app/media/
   frontend:
     image: ekaterinarez/foodgram_frontend
     env_file:
-      - ./.env
+      - .env
     command: cp -r /app/build/. /frontend_static/
     volumes:
       - ../frontend/:/app/result_build/
@@ -35,7 +35,7 @@ services:
       - frontend
     image: ekaterinarez/foodgram_gateway
     env_file:
-      - ./.env
+      - .env
     volumes:
       - static:/staticfiles/
       - media:/app/media/
