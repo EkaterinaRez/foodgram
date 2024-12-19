@@ -29,8 +29,8 @@ class IngredientsInline(admin.TabularInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'total_favorites')
-    list_filter = ('author__username', 'name', 'tags__slug')
-    search_fields = ('name', 'author__username', 'tags__slug')
+    list_filter = ('author__name', 'name', 'tags__slug')
+    search_fields = ('name', 'author__name', 'tags__slug')
     inlines = [IngredientsInline]
     autocomplete_fields = ('ingredients', 'tags')
 

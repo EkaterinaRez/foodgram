@@ -125,4 +125,4 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
 }
 
-DOMAIN_URL = 'http://example.com'
+DOMAIN_URL = 'https://foodkatya.zapto.org'
