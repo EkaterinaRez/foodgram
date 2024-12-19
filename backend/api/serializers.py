@@ -296,7 +296,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             {
                 "id": recipe.id,
                 "name": recipe.name,
-                "image": request.build_absolute_uri(recipe.image.url),
+                "image": f"{settings.DOMAIN_URL}/{recipe.image.url}",
                 "cooking_time": recipe.cooking_time
             }
             for recipe in recipes
