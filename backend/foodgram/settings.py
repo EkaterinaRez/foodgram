@@ -105,7 +105,8 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "collected_static"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -123,11 +124,5 @@ REST_FRAMEWORK = {
 DJOSER = {
     'LOGIN_FIELD': 'email',
 }
-
-
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:3000',
-# ]
-# CORS_URLS_REGEX = r'^/api/.*$'
 
 DOMAIN_URL = 'http://example.com'
