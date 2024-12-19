@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         imports = {
             "ingredients": {
-                "file_path": "/data/ingredients.csv",
+                "file_path": "./data/ingredients.csv",
                 "model": Ingredient,
                 "process_row": self.process_ingredient_row,
             },
