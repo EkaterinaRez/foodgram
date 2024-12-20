@@ -321,11 +321,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_link(self, request, pk=None):
         base_url = getattr(settings, 'DOMAIN_URL', 'http://localhost:8000')
         long_url = f'{base_url}/recipes/{pk}/'
-        url_short = generate_short_url()
-        url_short, created = UrlShort.objects.get_or_create(
+        short_url = generate_short_url()
+        short_url, created = UrlShort.objects.get_or_create(
             long_url=long_url)
 
-        return Response({"short-link": url_short})
+        return Response({"short-link": short_url})
 
     @action(
         detail=True,
