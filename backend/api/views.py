@@ -410,7 +410,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             url_path='download_shopping_cart'
             )
     def download_shopping_list(self, request):
-        """Скачивание корзины в pdf."""
+        """Скачивание корзины в файл."""
 
         user_id = request.user.id
         ingredients = (
@@ -420,8 +420,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             .annotate(total_amount=d_models.Sum('amount'))
         )
         response = HttpResponse(content_type='text/plain; charset=utf-8')
-        response['Content-Disposition'] = ('attachment;'
-                                           'filename="shopping_list.txt"')
+        response['Content-Disposition'] = (
+            'attachment;filename="shopping_list.txt"')
         response.write("Список покупок:\n\n")
 
         for item in ingredients:

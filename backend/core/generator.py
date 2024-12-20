@@ -17,4 +17,4 @@ def generate_short_url():
         choice(string.ascii_letters + string.digits)
         for _ in range(randint(MIN_GEN, MAX_GEN)))
 
-    return f'{base_url}/s/{randomize}'
+    return f'{base_url}/s/{randomize}/'
