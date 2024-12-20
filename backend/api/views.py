@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from core.generator import generate_short_url
 from core.filters import IngredientFilter, RecipeFilter
 from core.paginations import ApiPagination
 from core.permissions import IsAuthAuthorOrReadonly
@@ -320,11 +321,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_link(self, request, pk=None):
         base_url = getattr(settings, 'DOMAIN_URL', 'http://localhost:8000')
         long_url = f'{base_url}/recipes/{pk}/'
-        url_short, created = UrlShort.objects.get_or_create(
+        full_url_short = f'{base_url}/s/{generate_short_url}'
+        full_url_short, created = UrlShort.objects.get_or_create(
             long_url=long_url)
-        full_url_short = f'{base_url}/s/{url_short}'
-        short_url = full_url_short.short_url
-        return Response({"short-link": short_url})
+        return Response({"short-link": full_url_short})
 
     @action(
         detail=True,
