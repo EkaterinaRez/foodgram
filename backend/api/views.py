@@ -319,7 +319,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=[AllowAny])
     def get_link(self, request, pk=None):
         base_url = getattr(settings, 'DOMAIN_URL', 'http://localhost:8000')
-        long_url = f'/api/recipes/{pk}/'
+        long_url = f'{settings.DOMAIN_URL}/recipes/{pk}/'
         url_short, created = UrlShort.objects.get_or_create(
             long_url=long_url)
         short_url = f"{base_url}/s/{url_short.short_url}"
