@@ -4,6 +4,6 @@ from . import views
 
 
 urlpatterns = [
-    path('', views.redirect_to_long_url,
+    path('<str:short_url>', views.redirect_to_long_url,
          name='redirect_to_long_url'),
 ]
