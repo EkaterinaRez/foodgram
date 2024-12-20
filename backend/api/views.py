@@ -422,25 +422,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
             .values('ingredient__name', 'ingredient__measurement_unit')
             .annotate(total_amount=d_models.Sum('amount'))
         )
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = (
-            'attachment; filename="shopping_list.pdf"')
-
-        pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
-        pdf_file = canvas.Canvas(response)
-        pdf_file.setFont('DejaVuSans', 12)
-        y_position = 800
-        pdf_file.drawString(100, y_position, "Список покупок:")
-        y_position -= 25
+        response = HttpResponse(content_type='text/plain; charset=utf-8')
+        response['Content-Disposition'] = ('attachment;'
+                                           'filename="shopping_list.txt"')
+        response.write("Список покупок:\n\n")
 
         for item in ingredients:
             ingredient_name = item['ingredient__name']
             measurement_unit = item['ingredient__measurement_unit']
             total_amount = item['total_amount']
+            line = f"- {ingredient_name}: {total_amount} {measurement_unit}\n"
+            response.write(line)
 
-            line = f"- {ingredient_name}: {total_amount} {measurement_unit}"
-            pdf_file.drawString(100, y_position, line)
-            y_position -= 20
-
-        pdf_file.save()
         return response

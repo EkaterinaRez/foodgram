@@ -17,7 +17,6 @@ urlpatterns_detail = [
     path('', include(api_router.urls)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
-    path('s/', include('shortlink.urls')),
 ]
 
 urlpatterns = [
