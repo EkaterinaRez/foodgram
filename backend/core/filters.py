@@ -23,8 +23,7 @@ class RecipeFilter(filters.FilterSet):
     tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
         queryset=Tag.objects.all(),
-        to_field_name='slug',
-        conjoined=True
+        to_field_name='slug'
     )
 
     class Meta:

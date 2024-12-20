@@ -1,8 +1,6 @@
 import string
 from random import choice, randint
 
-from django.conf import settings
-
 from core.constants import MAX_GEN, MIN_GEN
 
 
