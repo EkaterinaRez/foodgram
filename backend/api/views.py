@@ -3,6 +3,8 @@ from django.db import models as d_models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -424,7 +426,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response['Content-Disposition'] = (
             'attachment; filename="shopping_list.pdf"')
 
+        pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
         pdf_file = canvas.Canvas(response)
+        pdf_file.setFont('DejaVuSans', 12)
         y_position = 800
         pdf_file.drawString(100, y_position, "Список покупок:")
         y_position -= 25
