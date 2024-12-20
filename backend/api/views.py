@@ -322,7 +322,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         long_url = f'{base_url}/recipes/{pk}/'
         url_short, created = UrlShort.objects.get_or_create(
             long_url=long_url)
-        short_url = f"{base_url}/s/{url_short.short_url}"
+        full_url_short = f'{base_url}/s/{url_short}'
+        short_url = full_url_short.short_url
         return Response({"short-link": short_url})
 
     @action(
