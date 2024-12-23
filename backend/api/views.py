@@ -324,8 +324,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             long_url=long_url,
             defaults={'short_url': generate_short_url()}
         )
+        full_short_url = base_url + '/s/' + url_short + '/
 
-        return Response({"short-link": url_short.short_url})
+        return Response({"short-link": full_short_url})
 
     @action(
         detail=True,
