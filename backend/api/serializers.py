@@ -148,7 +148,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError(
                 "Необходимо указать хотя бы один тег.")
-        unique_tags = set()
         if len(value) != len(set(value)):
             raise serializers.ValidationError(
                 "Теги должны быть уникальными."
