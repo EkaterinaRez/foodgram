@@ -180,12 +180,12 @@ def handle_favorite_or_cart(request,
     if request.method == 'POST':
         serializer_context = {'request': request}
         serializer = serializer_class(
-            data={'recipe': recipe.id},
+            data={'recipe': recipe},
             context=serializer_context
         )
         if serializer.is_valid(raise_exception=True):
-            serializer.save(user=user)
-            return Response(ShortRecipeSerializer(recipe).data,
+            serializer.save(user=user, recipe=recipe)
+            return Response(serializer.data,
                             status=status.HTTP_201_CREATED
                             )
         return Response(serializer.errors,
