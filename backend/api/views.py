@@ -235,6 +235,7 @@ def create_shopping_list_file(user_id):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для управления рецептами."""
 
+    queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticated,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
