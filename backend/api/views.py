@@ -4,6 +4,7 @@ from django.db import models as d_models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from djoser import views as djoser_views
 from io import BytesIO
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -25,7 +26,7 @@ from .serializers import (FavoriteSerializer, FoodgramUserSerializer,
                           SubscriptionSerializer, TagSerializer)
 
 
-class FoodgramUserViewSet(viewsets.ModelViewSet):
+class FoodgramUserViewSet(djoser_views.UserViewSet):
     """Вьюсет для управления пользователями."""
 
     queryset = FoodgramUser.objects.all()
