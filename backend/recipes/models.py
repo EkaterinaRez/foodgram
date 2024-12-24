@@ -60,7 +60,8 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag, verbose_name="Теги",
         help_text="Выберите теги",
-        related_name='recipes'
+        related_name='recipes',
+        validators=[RecipeValidators.tags_validator]
     )
     image = models.ImageField(
         upload_to="recipes/",

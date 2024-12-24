@@ -46,3 +46,10 @@ class RecipeValidators:
             raise ValidationError(
                 'Количество ингредиентов должно быть больше нуля.'
             )
+
+    @staticmethod
+    def tags_validator(value):
+        if value <= 0:
+            raise ValidationError(
+                'Количество тегов должно быть больше нуля.'
+            )

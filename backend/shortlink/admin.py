@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import (UrlShort)
+from .models import UrlShort
 
 
 @admin.register(UrlShort)
