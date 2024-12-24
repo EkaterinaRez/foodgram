@@ -22,7 +22,7 @@ from users.models import FoodgramUser, Subscription
 from .serializers import (FavoriteSerializer, FoodgramUserSerializer,
                           IngredientSerializer,
                           RecipeReadSerializer, RecipeWriteSerializer,
-                          ShoppingCartSerializer, ShortRecipeSerializer,
+                          ShoppingCartSerializer,
                           SubscriptionSerializer, TagSerializer)
 
 
