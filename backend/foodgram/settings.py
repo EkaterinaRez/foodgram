@@ -131,10 +131,10 @@ DJOSER = {
     'USER_CREATE_PASSWORD_RETYPE': True,
     'LOGOUT_ON_PASSWORD_CHANGE': True,
     'SERIALIZERS': {
-           'user_create': 'api.serializers.FoodgramUserSerializer',
-           'user': 'api.serializers.FoodgramUserSerializer',
-           'current_user': 'api.serializers.FoodgramUserSerializer',
-       },
+        'user_create': 'api.serializers.FoodgramUserSerializer',
+        'user': 'api.serializers.FoodgramUserSerializer',
+        'current_user': 'api.serializers.FoodgramUserSerializer',
+    },
 }
 
 DOMAIN_URL = 'https://foodkatya.zapto.org'
