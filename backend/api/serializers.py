@@ -212,16 +212,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
                   'recipes_count', 'avatar'
                   )
 
-    def validate(self, data):
-        user = self.context.get('request').user
-        author = data['author']
-
-        if Subscription.objects.filter(user=user, author=author).exists():
-            raise serializers.ValidationError("Такая подписка уже существует.")
-        if author == user:
-            raise serializers.ValidationError("Подписаться на себя нельзя.")
-        return data
-
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
         if user.is_anonymous:
