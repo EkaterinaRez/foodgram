@@ -74,13 +74,12 @@ class FoodgramUserViewSet(djoser_views.UserViewSet):
             url_path='subscribe')
     def subscribe(self, request, id=None):
         """Управление подписками."""
-        author = get_object_or_404(FoodgramUser, pk=id)
+        author = get_object_or_404(FoodgramUser, id=id)
         user = request.user
 
         if request.method == 'POST':
             data = {
-                'user': user,
-                'author': author
+                'author': author.id
             }
             serializer = SubscriptionSerializer(
                 data=data, context={'request': request})
