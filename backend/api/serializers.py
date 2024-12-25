@@ -184,7 +184,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
         fields = ('user', 'recipe')
 
 
-
 class ShortRecipeSerializer(serializers.ModelSerializer):
     """Короткий сериализатор для отображения рецептов."""
 
