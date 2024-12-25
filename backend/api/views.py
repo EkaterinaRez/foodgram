@@ -74,8 +74,8 @@ class FoodgramUserViewSet(djoser_views.UserViewSet):
             url_path='subscribe')
     def subscribe(self, request, id=None):
         """Управление подписками."""
-        author = get_object_or_404(FoodgramUser, id=id)
-        user = self.request.user
+        author = get_object_or_404(FoodgramUser, pk=id)
+        user = request.user
 
         if request.method == 'POST':
             data = {'author': author.id, 'user': user.id}
