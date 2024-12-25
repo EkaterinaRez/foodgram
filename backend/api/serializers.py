@@ -213,7 +213,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
                   )
 
     def validate(self, data):
-        user = data['user']
+        user = self.context.get('request').user
         author = data['author']
 
         if Subscription.objects.filter(user=user, author=author).exists():
