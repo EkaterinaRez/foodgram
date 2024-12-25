@@ -213,8 +213,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
                   )
 
     def validate(self, data):
-        user = self.context.get('request').user
-        author = data['author']
+        user = data.get('user')
+        author = data.get('author')
 
         if Subscription.objects.filter(user=user, author=author).exists():
             raise serializers.ValidationError("Такая подписка уже существует.")
