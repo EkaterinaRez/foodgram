@@ -79,8 +79,8 @@ class FoodgramUserViewSet(djoser_views.UserViewSet):
 
         if request.method == 'POST':
             data = {
-                'user': user,
-                'author': author
+                'user': user.id,
+                'author': author.id
             }
             serializer = SubscriptionSerializer(
                 data=data, context={'request': request})
