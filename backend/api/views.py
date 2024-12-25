@@ -22,7 +22,7 @@ from users.models import FoodgramUser, Subscription
 from .serializers import (FavoriteSerializer, FoodgramUserSerializer,
                           IngredientSerializer,
                           RecipeReadSerializer, RecipeWriteSerializer,
-                          ShoppingCartSerializer,
+                          ShoppingCartSerializer, ShortRecipeSerializer,
                           SubscriptionSerializer, TagSerializer)
 
 
@@ -185,7 +185,7 @@ def handle_favorite_or_cart(request,
         )
         if serializer.is_valid(raise_exception=True):
             serializer.save(user=user, recipe=recipe)
-            return Response(serializer.data,
+            return Response(ShortRecipeSerializer(recipe).data,
                             status=status.HTTP_201_CREATED
                             )
         return Response(serializer.errors,
@@ -235,11 +235,57 @@ def create_shopping_list_file(user_id):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для управления рецептами."""
 
-    queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticated,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = ApiPagination
+
+    def get_queryset(self):
+
+        prefetch_subs = d_models.Prefetch(
+            'author__subscribers',
+            queryset=Subscription.objects.all().annotate(
+                is_subscribed=d_models.Exists(
+                    Subscription.objects.filter(
+                        author=d_models.OuterRef('author'),
+                        user_id=self.request.user.id,
+                    )
+                ) if self.request.user.is_authenticated else d_models.Value(
+                    False,
+                    output_field=d_models.BooleanField()
+                )
+            ),
+            to_attr='subs',
+        )
+
+        query = Recipe.objects.select_related('author').prefetch_related(
+            'recipe_ingredients__ingredient',
+            'recipe_ingredients',
+            'tags',
+            prefetch_subs,
+        )
+
+        if self.request.user.is_authenticated:
+            query = query.annotate(
+                is_favorited=d_models.Exists(
+                    Favorite.objects.filter(
+                        user_id=self.request.user.id, recipe=d_models.OuterRef('pk')
+                    )
+                ),
+                is_in_shopping_cart=d_models.Exists(
+                    ShoppingCart.objects.filter(
+                        user_id=self.request.user.id, recipe=d_models.OuterRef('pk')
+                    )
+                ),
+            )
+        else:
+            query = query.annotate(
+                is_favorited=d_models.Value(
+                    False, output_field=d_models.BooleanField()),
+                is_in_shopping_cart=d_models.Value(
+                    False, output_field=d_models.BooleanField()),
+            )
+        return query.order_by('-pub_date').all()
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):

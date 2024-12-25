@@ -120,7 +120,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             ingredient = ingredient['id']
             ingredient_instance = IngredientForRecipe(
                 recipe=recipe,
-                ingredient_id=ingredient,
+                ingredient=ingredient,
                 amount=amount
             )
             ingredient_objects.append(ingredient_instance)
@@ -148,6 +148,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError(
                 "Необходимо указать хотя бы один тег.")
+
         if len(value) != len(set(value)):
             raise serializers.ValidationError(
                 "Теги должны быть уникальными."
