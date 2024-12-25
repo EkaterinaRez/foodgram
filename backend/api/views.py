@@ -178,7 +178,8 @@ def handle_favorite_or_cart(request,
                             remove_message):
     """Обработка добавления рецепта в избранное или корзину."""
     if request.method == 'POST':
-        serializer_context = {'request': request}
+        serializer_context = {'request': request,
+                              'user': user}
         serializer = serializer_class(
             data={'recipe': recipe},
             context=serializer_context

@@ -183,15 +183,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = ('user', 'recipe')
 
-    def validate(self, attrs):
-        user = self.context['request'].user
-        recipe = attrs.get('recipe')
-
-        if Favorite.objects.filter(user=user, recipe=recipe).exists():
-            raise serializers.ValidationError(
-                {'recipe': 'Рецепт уже добавлен!'})
-
-        return attrs
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -285,12 +276,3 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = ('id', 'name', 'image', 'cooking_time')
-
-    def validate(self, attrs):
-        user = self.context['user']
-        recipe = attrs['recipe']
-
-        if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
-            raise serializers.ValidationError("Рецепт уже в корзине.")
-
-        return attrs
