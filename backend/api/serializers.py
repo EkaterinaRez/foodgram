@@ -213,8 +213,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
                   )
 
     def validate(self, data):
-
-        if Subscription.objects.filter(user=data['user'], author=data['author']).exists():
+        if Subscription.objects.filter(
+                user=data['user'], author=data['author']).exists():
             raise serializers.ValidationError("Такая подписка уже существует.")
         if data['user'] == data['author']:
             raise serializers.ValidationError("Подписаться на себя нельзя.")
