@@ -217,7 +217,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     #     author = data['author']
 
     #     if Subscription.objects.filter(user=user, author=author).exists():
-    #         raise serializers.ValidationError("Такая подписка уже существует.")
+    #         raise serializers.ValidationError("Такая подписка
+    # уже существует.")
     #     if author == user:
     #         raise serializers.ValidationError("Подписаться на себя нельзя.")
     #     return data
