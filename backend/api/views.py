@@ -181,7 +181,7 @@ def handle_favorite_or_cart(request,
         serializer_context = {'request': request,
                               'user': user}
         serializer = serializer_class(
-            data={'recipe': recipe},
+            data={'user': user, 'recipe': recipe},
             context=serializer_context
         )
         if serializer.is_valid(raise_exception=True):
