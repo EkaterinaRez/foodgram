@@ -269,12 +269,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             query = query.annotate(
                 is_favorited=d_models.Exists(
                     Favorite.objects.filter(
-                        user_id=self.request.user.id, recipe=d_models.OuterRef('pk')
+                        user_id=self.request.user.id, recipe=d_models.OuterRef(
+                            'pk')
                     )
                 ),
                 is_in_shopping_cart=d_models.Exists(
                     ShoppingCart.objects.filter(
-                        user_id=self.request.user.id, recipe=d_models.OuterRef('pk')
+                        user_id=self.request.user.id, recipe=d_models.OuterRef(
+                            'pk')
                     )
                 ),
             )
