@@ -255,6 +255,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             return f"{settings.MEDIA_URL}{obj.author.avatar}"
         return None
 
+    def create(self, validated_data):
+        return Subscription.objects.create(**validated_data)
+
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор корзины."""
