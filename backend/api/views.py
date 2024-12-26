@@ -29,7 +29,7 @@ from .serializers import (FavoriteSerializer, FoodgramUserSerializer,
 class FoodgramUserViewSet(djoser_views.UserViewSet):
     """Вьюсет для управления пользователями."""
 
-    queryset = FoodgramUser.objects.all()
+    queryset = FoodgramUser.objects
     permission_classes = (IsAuthenticated,)
     filter_backends = (DjangoFilterBackend,)
     search_fields = ("username",)
@@ -153,7 +153,7 @@ class FoodgramUserViewSet(djoser_views.UserViewSet):
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для управления тегами рецептов."""
 
-    queryset = Tag.objects.all()
+    queryset = Tag.objects
     serializer_class = TagSerializer
     permission_classes = (AllowAny,)
 
@@ -161,7 +161,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для управления ингредиентами рецептов."""
 
-    queryset = Ingredient.objects.all()
+    queryset = Ingredient.objects
     serializer_class = IngredientSerializer
     filterset_class = IngredientFilter
     permission_classes = (AllowAny,)
@@ -209,7 +209,7 @@ def handle_favorite_or_cart(request,
 
 
 def create_shopping_list_file(user_id):
-    """Создание файла списка покупок для пользователя."""
+    """Создание списка покупок для пользователя."""
     ingredients = (
         IngredientForRecipe.objects
         .filter(recipe__shopping_cart__user_id=user_id)
@@ -239,10 +239,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = ApiPagination
 
     def get_queryset(self):
-
         prefetch_subs = d_models.Prefetch(
             'author__subscribers',
-            queryset=Subscription.objects.all().annotate(
+            queryset=Subscription.objects.annotate(
                 is_subscribed=d_models.Exists(
                     Subscription.objects.filter(
                         author=d_models.OuterRef('author'),
@@ -303,27 +302,38 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def is_favorited_by(self, user):
         return Favorite.objects.filter(user=user, recipe=self).exists()
 
-    def create(self, request, *args, **kwargs):
-        """Переопределение для возвращения данных через другой сериализатор."""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    def perform_create(self, serializer):
+        """Возврат данных через другой сериализатор."""
         recipe = serializer.save()
         read_serializer = RecipeReadSerializer(
             recipe, context=self.get_serializer_context())
-        return Response(read_serializer.data, status=status.HTTP_201_CREATED)
+        return read_serializer.data
+
+    def perform_update(self, serializer):
+        """Возврат данных через другой сериализатор."""
+        recipe = serializer.save()
+        read_serializer = RecipeReadSerializer(
+            recipe, context=self.get_serializer_context())
+        return read_serializer.data
+
+    def create(self, request, *args, **kwargs):
+        """Переопределение для использования perform_create."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        read_data = self.perform_create(
+            serializer)
+        return Response(read_data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
-        """Переопределение для возвращения данных через другой сериализатор."""
+        """Переопределение для использования perform_update."""
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         write_serializer = self.get_serializer(
             instance, data=request.data, partial=partial)
         write_serializer.is_valid(raise_exception=True)
-        recipe = write_serializer.save()
-        read_serializer = RecipeReadSerializer(
-            recipe, context={'request': request})
-
-        return Response(read_serializer.data)
+        read_data = self.perform_update(
+            write_serializer)
+        return Response(read_data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

@@ -209,14 +209,16 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         model = Subscription
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', 'is_subscribed', 'recipes',
-                  'recipes_count', 'avatar'
+                  'recipes_count', 'avatar', 'user', 'author'
                   )
 
     def validate(self, data):
+        user = data.get('user')
+        author = data.get('author')
         if Subscription.objects.filter(
-                user=data['user'], author=data['author']).exists():
+                user=user, author=author).exists():
             raise serializers.ValidationError("Такая подписка уже существует.")
-        if data['user'] == data['author']:
+        if user == author:
             raise serializers.ValidationError("Подписаться на себя нельзя.")
         return data
 
