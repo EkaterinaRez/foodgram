@@ -356,6 +356,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         full_short_url = f'{base_url}/s/{recipe.short_url}'
 
         return Response({"short-link": full_short_url})
+
     @action(
         detail=True,
         methods=['post', 'delete'],
