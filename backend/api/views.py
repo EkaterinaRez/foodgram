@@ -355,8 +355,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         base_url = getattr(settings, 'DOMAIN_URL', 'http://localhost:8000')
         if not recipe.short_url:
             recipe.save()
-
-        long_url = f'{base_url}/recipes/{pk}/'
         full_short_url = f'{base_url}/s/{recipe.url_short}'
 
         return Response({"short-link": full_short_url})

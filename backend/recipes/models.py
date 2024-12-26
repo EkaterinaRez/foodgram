@@ -176,7 +176,7 @@ class Favorite(AbstractUserRecipe):
         )
 
     def __str__(self):
-        return f"Рецепт в избранном: {self.recipe.name}, пользователь: {self.user}"
+        return f"Рецепт в избранном: {self.recipe.name}"
 
 
 class ShoppingCart(AbstractUserRecipe):
