@@ -208,7 +208,7 @@ def create_shopping_list_file(user_id):
     """Создание списка покупок для пользователя."""
     ingredients = (
         IngredientForRecipe.objects
-        .filter(recipe__shopping_cart__user_id=user_id)
+        .filter(recipe__shoppingcart_related__user_id=user_id)
         .values('ingredient__name', 'ingredient__measurement_unit')
         .annotate(total_amount=d_models.Sum('amount'))
     )
@@ -356,7 +356,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         full_short_url = f'{base_url}/s/{recipe.short_url}'
 
         return Response({"short-link": full_short_url})
-
     @action(
         detail=True,
         methods=['post', 'delete'],

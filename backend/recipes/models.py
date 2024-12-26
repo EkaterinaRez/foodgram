@@ -140,6 +140,7 @@ class AbstractUserRecipe(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name="Пользователь",
+        related_name="%(class)s_related"
     )
 
     recipe = models.ForeignKey(
@@ -147,6 +148,7 @@ class AbstractUserRecipe(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Рецепт",
         help_text="Рецепт, связанный с пользователем",
+        related_name="%(class)s_related"
     )
 
     class Meta:
