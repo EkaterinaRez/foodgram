@@ -72,13 +72,6 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
 AUTH_USER_MODEL = 'users.FoodgramUser'
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -127,10 +120,9 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
-    'USER_CREATE_PASSWORD_RETYPE': True,
-    'LOGOUT_ON_PASSWORD_CHANGE': True,
-    'PASSWORD_RESET_CONFIRM_URL': '#/set_password/',
     'SERIALIZERS': {
+        'set_password': 'djoser.serializers.SetPasswordSerializer',
+        'set_password_retype': 'djoser.serializers.SetPasswordRetypeSerializer',
         'user_create': 'api.serializers.FoodgramUserSerializer',
         'user': 'api.serializers.FoodgramUserSerializer',
         'current_user': 'api.serializers.FoodgramUserSerializer',
@@ -138,3 +130,5 @@ DJOSER = {
 }
 
 DOMAIN_URL = 'https://foodkatya.zapto.org'
+
+PAGE_SIZE = 5

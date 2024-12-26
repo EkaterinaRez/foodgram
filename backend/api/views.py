@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import models as d_models
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views as djoser_views
 from io import BytesIO
@@ -11,14 +11,13 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from core.generator import generate_short_url
-from core.filters import IngredientFilter, RecipeFilter
-from core.paginations import ApiPagination
-from core.permissions import IsAuthAuthorOrReadonly
 from recipes.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
                             ShoppingCart, Tag)
 from shortlink.models import UrlShort
 from users.models import FoodgramUser, Subscription
+from .filters import IngredientFilter, RecipeFilter
+from .paginations import ApiPagination
+from .permissions import IsAuthAuthorOrReadonly
 from .serializers import (FavoriteSerializer, FoodgramUserSerializer,
                           IngredientSerializer,
                           RecipeReadSerializer, RecipeWriteSerializer,
@@ -230,6 +229,14 @@ def create_shopping_list_file(user_id):
     return buffer
 
 
+def redirect_to_long_url(request, short_key):
+    """Редирект на рецепт по короткому ссылке."""
+    recipe = get_object_or_404(Recipe, short_url=short_key)
+    base_url = getattr(settings, 'DOMAIN_URL', 'http://localhost:8000')
+    long_url = f'{base_url}/recipes/{recipe.pk}/'
+    return redirect(long_url)
+
+
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для управления рецептами."""
 
@@ -345,13 +352,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
             url_path='get-link',
             permission_classes=[AllowAny])
     def get_link(self, request, pk=None):
+        recipe = self.get_object()
         base_url = getattr(settings, 'DOMAIN_URL', 'http://localhost:8000')
+        if not recipe.short_url:
+            recipe.save()
+
         long_url = f'{base_url}/recipes/{pk}/'
-        url_short, created = UrlShort.objects.get_or_create(
-            long_url=long_url,
-            defaults={'short_url': generate_short_url()}
-        )
-        full_short_url = f'{base_url}/s/{url_short}'
+        full_short_url = f'{base_url}/s/{recipe.url_short}'
 
         return Response({"short-link": full_short_url})
 

@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
 
@@ -17,7 +16,7 @@ class UserValidators:
         code="invalid_email",
     )
 
-    fio_validator = RegexValidator(
+    surname_name_validator = RegexValidator(
         regex=r"^[A-ZА-ЯЁ][a-zа-яё]*(?:[- ][A-ZА-ЯЁ][a-zа-яё]*)*$",
         message="Некорректное ФИО",
         code="invalid_fio",
@@ -32,24 +31,3 @@ class RecipeValidators:
         message="Некорректный слаг",
         code="invalid_slug",
     )
-
-    @staticmethod
-    def cook_time_validator(value):
-        if value <= 0:
-            raise ValidationError(
-                'Время приготовления должно быть больше нуля.'
-            )
-
-    @staticmethod
-    def count_ingredients_validator(value):
-        if value <= 0:
-            raise ValidationError(
-                'Количество ингредиентов должно быть больше нуля.'
-            )
-
-    @staticmethod
-    def tags_validator(value):
-        if value <= 0:
-            raise ValidationError(
-                'Количество тегов должно быть больше нуля.'
-            )

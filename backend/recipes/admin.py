@@ -28,7 +28,7 @@ class IngredientsInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author', 'total_favorites')
+    list_display = ('name', 'author', 'total_favorites', 'short_url')
     list_filter = ('author__first_name', 'name', 'tags__slug')
     search_fields = ('name', 'author__first_name', 'tags__slug')
     inlines = [IngredientsInline]

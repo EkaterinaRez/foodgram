@@ -1,5 +1,7 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
+from core.generator import generate_short_url
 from core.validators import RecipeValidators
 from users.models import FoodgramUser
 
@@ -61,7 +63,7 @@ class Recipe(models.Model):
         Tag, verbose_name="Теги",
         help_text="Выберите теги",
         related_name='recipes',
-        validators=[RecipeValidators.tags_validator]
+        validators=[MinValueValidator(1)]
     )
     image = models.ImageField(
         upload_to="recipes/",
@@ -81,9 +83,11 @@ class Recipe(models.Model):
         null=False,
         verbose_name="Время приготовления",
         help_text="Введите время приготовления",
-        validators=[RecipeValidators.cook_time_validator],
+        validators=[MinValueValidator(1),
+                    MaxValueValidator(500)],
     )
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
+    short_url = models.URLField(unique=True, null=True, blank=True)
 
     class Meta:
         ordering = ("-pub_date",)
@@ -92,6 +96,12 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f'Рецепт {self.name}, автор {self.author}'
+
+    def save(self, *args, **kwargs):
+        """Генерация короткой ссылки."""
+        if not self.short_url:
+            self.short_url = generate_short_url()
+        super().save(*args, **kwargs)
 
 
 class IngredientForRecipe(models.Model):
@@ -109,7 +119,7 @@ class IngredientForRecipe(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         'Количество',
-        validators=[RecipeValidators.count_ingredients_validator]
+        validators=[MinValueValidator(1)]
     )
 
     class Meta:
@@ -123,24 +133,39 @@ class IngredientForRecipe(models.Model):
         verbose_name_plural = 'Ингредиенты рецептов'
 
 
-class Favorite(models.Model):
-    """Модель для сохранения избранных рецептов."""
+class AbstractUserRecipe(models.Model):
+    """Абстрактная модель для связывания пользователя и рецепта."""
 
     user = models.ForeignKey(
         FoodgramUser,
         on_delete=models.CASCADE,
         verbose_name="Пользователь",
-        related_name='favorites',
     )
 
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         verbose_name="Рецепт",
-        related_name='favorites',
+        help_text="Рецепт, связанный с пользователем",
     )
 
     class Meta:
+        abstract = True
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_user_recipe'
+            ),
+        )
+
+    def __str__(self):
+        return f"Рецепт: {self.recipe.name}, Пользователь: {self.user}"
+
+
+class Favorite(AbstractUserRecipe):
+    """Модель для сохранения избранных рецептов."""
+
+    class Meta(AbstractUserRecipe.Meta):
         verbose_name = "Избранное"
         verbose_name_plural = "Избранные"
         constraints = (
@@ -151,34 +176,22 @@ class Favorite(models.Model):
         )
 
     def __str__(self):
-        return ("Рецепт в избранном: "
-                f"{self.recipe.name}, пользователь: {self.user}")
+        return f"Рецепт в избранном: {self.recipe.name}, пользователь: {self.user}"
 
 
-class ShoppingCart(models.Model):
-    user = models.ForeignKey(
-        FoodgramUser,
-        on_delete=models.CASCADE,
-        related_name='shopping_cart',
-        verbose_name='Пользователь',
-        help_text='Список покупок пользователя'
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='shopping_cart',
-    )
+class ShoppingCart(AbstractUserRecipe):
+    """Модель для списка покупок пользователя."""
 
-    class Meta:
+    class Meta(AbstractUserRecipe.Meta):
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
+        ordering = ('-recipe',)
         constraints = (
             models.UniqueConstraint(
                 fields=('user', 'recipe'),
                 name='unique_cart'
             ),
         )
-        verbose_name = 'Список покупок'
-        verbose_name_plural = 'Списки покупок'
-        ordering = ('-recipe',)
 
-        def __str__(self):
-            return f"Рецепт в списке у {self.user}"
+    def __str__(self):
+        return f"Рецепт в списке у {self.user}"

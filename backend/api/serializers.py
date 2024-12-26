@@ -3,9 +3,10 @@ import base64
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
+from rest_framework import serializers
+
 from recipes.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
                             ShoppingCart, Tag)
-from rest_framework import serializers
 from users.models import FoodgramUser, Subscription
 
 

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from core.validators import UserValidators
+from backend.core.validators import UserValidators
 
 
 class FoodgramUser(AbstractUser):
@@ -23,12 +23,12 @@ class FoodgramUser(AbstractUser):
     first_name = models.CharField(
         "Имя",
         max_length=150,
-        validators=[UserValidators.fio_validator],
+        validators=[UserValidators.surname_name_validator],
     )
     last_name = models.CharField(
         "Фамилия",
         max_length=150,
-        validators=[UserValidators.fio_validator],
+        validators=[UserValidators.surname_name_validator],
     )
     password = models.CharField(
         "Пароль",

@@ -25,8 +25,13 @@ class Command(BaseCommand):
     def import_data(self, file_path, model, process_row):
         with open(file_path, newline="", encoding="utf-8") as csvfile:
             reader = csv.DictReader(csvfile)
+            ingredient_objects = []
             for row in reader:
-                process_row(row, model)
+                obj = process_row(row, model)
+                if obj is not None:
+                    ingredient_objects.append(obj)
+
+            model.objects.bulk_create(ingredient_objects)
 
     def process_ingredient_row(self, row, model):
         model.objects.create(
