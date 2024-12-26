@@ -226,9 +226,9 @@ def create_shopping_list_file(user_id):
     return buffer
 
 
-def redirect_to_long_url(request, short_key):
+def redirect_to_long_url(request, short_url):
     """Редирект на рецепт по короткому ссылке."""
-    recipe = get_object_or_404(Recipe, short_url=short_key)
+    recipe = get_object_or_404(Recipe, short_url=short_url)
     base_url = getattr(settings, 'DOMAIN_URL', 'http://localhost:8000')
     long_url = f'{base_url}/recipes/{recipe.pk}/'
     return redirect(long_url)
