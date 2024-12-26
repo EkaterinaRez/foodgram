@@ -129,6 +129,7 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'USER_CREATE_PASSWORD_RETYPE': True,
     'LOGOUT_ON_PASSWORD_CHANGE': True,
+    'PASSWORD_RESET_CONFIRM_URL': '#/set_password/',
     'SERIALIZERS': {
         'user_create': 'api.serializers.FoodgramUserSerializer',
         'user': 'api.serializers.FoodgramUserSerializer',
