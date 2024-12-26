@@ -10,18 +10,6 @@ class UserValidators:
         code="invalid_username",
     )
 
-    email_validator = RegexValidator(
-        regex=r"[^@]+@[^@]+\.[^@]+",
-        message="Email: некорректный адрес электронной почты",
-        code="invalid_email",
-    )
-
-    surname_name_validator = RegexValidator(
-        regex=r"^[A-ZА-ЯЁ][a-zа-яё]*(?:[- ][A-ZА-ЯЁ][a-zа-яё]*)*$",
-        message="Некорректное ФИО",
-        code="invalid_fio",
-    )
-
 
 class RecipeValidators:
     """Класс валидаторов для рецептов Foodgram."""

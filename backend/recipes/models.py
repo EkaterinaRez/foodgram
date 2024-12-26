@@ -3,7 +3,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 from core.generator import generate_short_url
 from core.validators import RecipeValidators
-from users.models import FoodgramUser
+from users.models import User
 
 
 class Tag(models.Model):
@@ -47,7 +47,7 @@ class Recipe(models.Model):
     """Модель рецепта."""
 
     author = models.ForeignKey(
-        FoodgramUser,
+        User,
         on_delete=models.CASCADE,
         related_name="recipes",
         verbose_name="Автор рецепта",
@@ -137,7 +137,7 @@ class AbstractUserRecipe(models.Model):
     """Абстрактная модель для связывания пользователя и рецепта."""
 
     user = models.ForeignKey(
-        FoodgramUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name="Пользователь",
     )

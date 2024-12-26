@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     "api.apps.ApiConfig",
     "recipes.apps.RecipesConfig",
     "users.apps.UsersConfig",
-    "shortlink.apps.ShortlinkConfig",
 ]
 
 MIDDLEWARE = [
@@ -72,7 +71,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'users.FoodgramUser'
+AUTH_USER_MODEL = 'users.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -123,9 +122,9 @@ DJOSER = {
     'SERIALIZERS': {
         'set_password': 'djoser.serializers.SetPasswordSerializer',
         'set_password_retype': 'djoser.serializers.SetPasswordRetypeSerializer',
-        'user_create': 'api.serializers.FoodgramUserSerializer',
-        'user': 'api.serializers.FoodgramUserSerializer',
-        'current_user': 'api.serializers.FoodgramUserSerializer',
+        'user_create': 'api.serializers.UserSerializer',
+        'user': 'api.serializers.UserSerializer',
+        'current_user': 'api.serializers.UserSerializer',
     },
 }
 

@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from users.models import FoodgramUser, Subscription
+from users.models import User, Subscription
 
 
-@admin.register(FoodgramUser)
-class FoodgramUserAdmin(UserAdmin):
+@admin.register(User)
+class UserAdmin(UserAdmin):
     empty_value_display = 'Не задано'
     list_display = ("username", "email", "first_name", "last_name", "is_staff")
     search_fields = ("username", "email")

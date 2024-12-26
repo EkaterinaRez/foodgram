@@ -13,22 +13,21 @@ from rest_framework.response import Response
 
 from recipes.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
                             ShoppingCart, Tag)
-from shortlink.models import UrlShort
-from users.models import FoodgramUser, Subscription
+from users.models import User, Subscription
 from .filters import IngredientFilter, RecipeFilter
 from .paginations import ApiPagination
 from .permissions import IsAuthAuthorOrReadonly
-from .serializers import (FavoriteSerializer, FoodgramUserSerializer,
+from .serializers import (FavoriteSerializer, UserSerializer,
                           IngredientSerializer,
                           RecipeReadSerializer, RecipeWriteSerializer,
                           ShoppingCartSerializer, ShortRecipeSerializer,
                           SubscriptionSerializer, TagSerializer)
 
 
-class FoodgramUserViewSet(djoser_views.UserViewSet):
+class UserViewSet(djoser_views.UserViewSet):
     """Вьюсет для управления пользователями."""
 
-    queryset = FoodgramUser.objects
+    queryset = User.objects
     permission_classes = (IsAuthenticated,)
     filter_backends = (DjangoFilterBackend,)
     search_fields = ("username",)
@@ -73,7 +72,7 @@ class FoodgramUserViewSet(djoser_views.UserViewSet):
             url_path='subscribe')
     def subscribe(self, request, id):
         """Управление подписками."""
-        author = get_object_or_404(FoodgramUser, id=id)
+        author = get_object_or_404(User, id=id)
         user = request.user
 
         if request.method == 'POST':
@@ -136,12 +135,12 @@ class FoodgramUserViewSet(djoser_views.UserViewSet):
     def get_permissions(self):
         if self.action in ('create', 'list', 'retrieve'):
             self.permission_classes = (AllowAny,)
-        return super(FoodgramUserViewSet, self).get_permissions()
+        return super(UserViewSet, self).get_permissions()
 
     def get_serializer_class(self):
         if self.action in ('subscribe', 'list_subscriptions'):
             return SubscriptionSerializer
-        return FoodgramUserSerializer
+        return UserSerializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

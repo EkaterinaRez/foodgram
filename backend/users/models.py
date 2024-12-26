@@ -1,10 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from backend.core.validators import UserValidators
+from core.validators import UserValidators
 
 
-class FoodgramUser(AbstractUser):
+class User(AbstractUser):
     """Модель пользователя Foodgram."""
 
     username = models.CharField(
@@ -18,17 +18,14 @@ class FoodgramUser(AbstractUser):
         "Почта",
         max_length=254,
         unique=True,
-        validators=[UserValidators.email_validator],
     )
     first_name = models.CharField(
         "Имя",
         max_length=150,
-        validators=[UserValidators.surname_name_validator],
     )
     last_name = models.CharField(
         "Фамилия",
         max_length=150,
-        validators=[UserValidators.surname_name_validator],
     )
     password = models.CharField(
         "Пароль",
@@ -36,6 +33,9 @@ class FoodgramUser(AbstractUser):
         help_text="Пароль должен быть надежным.",
     )
     avatar = models.ImageField(upload_to='users/', null=True, blank=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
         verbose_name = "Пользователь"
@@ -49,13 +49,13 @@ class Subscription(models.Model):
     """Модель подписки на авторов."""
 
     user = models.ForeignKey(
-        FoodgramUser,
+        User,
         verbose_name="Подписчик",
         related_name="subscriptions",
         on_delete=models.CASCADE,
     )
     author = models.ForeignKey(
-        FoodgramUser,
+        User,
         verbose_name="Автор рецептов",
         on_delete=models.CASCADE,
         related_name="subscribers",

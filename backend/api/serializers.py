@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from recipes.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
                             ShoppingCart, Tag)
-from users.models import FoodgramUser, Subscription
+from users.models import User, Subscription
 
 
 class Base64ImageField(serializers.ImageField):
@@ -22,7 +22,7 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
 
-class FoodgramUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     """Сериализатор пользователей."""
 
     avatar = Base64ImageField(required=False, allow_null=True)
@@ -30,14 +30,14 @@ class FoodgramUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = FoodgramUser
+        model = User
         fields = ('email', 'id', 'username',
                   'first_name', 'last_name',
                   'is_subscribed', 'avatar', 'password')
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = FoodgramUser(**validated_data)
+        user = User(**validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -83,7 +83,7 @@ class IngredientForRecipeSerializer(serializers.ModelSerializer):
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериализатор для метода get рецепта."""
 
-    author = FoodgramUserSerializer(read_only=True)
+    author = UserSerializer(read_only=True)
     ingredients = IngredientForRecipeSerializer(
         source='recipe_ingredients', many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
