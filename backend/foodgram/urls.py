@@ -3,7 +3,11 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from api.views import redirect_to_long_url
+
 urlpatterns = [
+    path('s/<str:short_url>', redirect_to_long_url,
+         name='redirect_to_long_url'),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
 

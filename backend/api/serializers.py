@@ -35,6 +35,17 @@ class UserSerializer(serializers.ModelSerializer):
                   'first_name', 'last_name',
                   'is_subscribed', 'avatar', 'password')
 
+    def validate(self, attrs):
+        request = self.context.get('request')
+        if request.method in ('POST', 'PUT', 'DELETE') and (
+                not request.path.startswith('/api/users/')):
+            if not request.user.is_authenticated:
+                raise serializers.ValidationError("У вас нет прав.")
+
+        if 'avatar' in attrs and attrs['avatar'] is None:
+            raise serializers.ValidationError("Аватарку добавь.")
+        return super().validate(attrs)
+
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = User(**validated_data)

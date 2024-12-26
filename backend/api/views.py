@@ -26,14 +26,27 @@ from .serializers import (FavoriteSerializer, UserSerializer,
 
 class UserViewSet(djoser_views.UserViewSet):
     """Вьюсет для управления пользователями."""
-
-    queryset = User.objects
-    permission_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
     search_fields = ("username",)
     http_method_names = ("get", "post", "put", "delete")
     lookup_field = "id"
     pagination_class = ApiPagination
+
+    def get_permissions(self):
+        if self.action in ('create', 'list', 'retrieve'):
+            self.permission_classes = (AllowAny,)
+        return super(UserViewSet, self).get_permissions()
+
+    def get_serializer_class(self):
+        if self.action in ('subscribe', 'list_subscriptions'):
+            return SubscriptionSerializer
+        return UserSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     @action(
         detail=False,
@@ -131,21 +144,6 @@ class UserViewSet(djoser_views.UserViewSet):
         )
 
         return Response(serializer.data)
-
-    def get_permissions(self):
-        if self.action in ('create', 'list', 'retrieve'):
-            self.permission_classes = (AllowAny,)
-        return super(UserViewSet, self).get_permissions()
-
-    def get_serializer_class(self):
-        if self.action in ('subscribe', 'list_subscriptions'):
-            return SubscriptionSerializer
-        return UserSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['request'] = self.request
-        return context
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -355,7 +353,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         base_url = getattr(settings, 'DOMAIN_URL', 'http://localhost:8000')
         if not recipe.short_url:
             recipe.save()
-        full_short_url = f'{base_url}/s/{recipe.url_short}'
+        full_short_url = f'{base_url}/s/{recipe.short_url}'
 
         return Response({"short-link": full_short_url})
 
