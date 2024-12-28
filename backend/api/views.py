@@ -250,7 +250,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 is_subscribed=d_models.Exists(
                     Subscription.objects.filter(
                         author=d_models.OuterRef('author'),
-                        user_id=self.request.user.id,
+                        user=self.request.user.id,
                     )
                 ) if self.request.user.is_authenticated else d_models.Value(
                     False,
@@ -271,23 +271,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
             query = query.annotate(
                 is_favorited=d_models.Exists(
                     Favorite.objects.filter(
-                        user_id=self.request.user.id, recipe=d_models.OuterRef(
+                        user=self.request.user.id, recipe=d_models.OuterRef(
                             'pk')
                     )
                 ),
                 is_in_shopping_cart=d_models.Exists(
                     ShoppingCart.objects.filter(
-                        user_id=self.request.user.id, recipe=d_models.OuterRef(
-                            'id')
+                        user=self.request.user.id, recipe=d_models.OuterRef(
+                            'pk')
                     )
                 ),
             )
-        query = query.annotate(
-            is_favorited=d_models.Value(
-                False, output_field=d_models.BooleanField()),
-            is_in_shopping_cart=d_models.Value(
-                False, output_field=d_models.BooleanField()),
-        )
         return query.order_by('-pub_date').all()
 
     def get_serializer_class(self):
