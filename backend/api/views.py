@@ -297,7 +297,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     @login_required
-    def is_favorited_by(self, user):
+    def is_favorited(self, user):
         return Favorite.objects.filter(user=user, recipe=self).exists()
 
     def perform_create(self, serializer):
@@ -333,7 +333,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path='favorite')
     def favorite(self, request, *args, **kwargs):
         user = request.user
-        recipe = get_object_or_404(Recipe, id=self.kwargs.get('id'))
+        recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
 
         return handle_favorite_or_cart(
             request=request,
