@@ -98,10 +98,9 @@ class UserViewSet(djoser_views.UserViewSet):
                 return Response(serializer.data,
                                 status=status.HTTP_201_CREATED
                                 )
-            else:
-                return Response(serializer.errors,
-                                status=status.HTTP_400_BAD_REQUEST
-                                )
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST
+                            )
 
         if request.method == 'DELETE':
             deleted_count, _ = Subscription.objects.filter(
@@ -114,11 +113,10 @@ class UserViewSet(djoser_views.UserViewSet):
                 {'status': 'Подписка удалена.'},
                 status=status.HTTP_204_NO_CONTENT
             )
-        else:
-            return Response(
-                {'status': 'Подписка не существует.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        return Response(
+            {'status': 'Подписка не существует.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     @action(detail=False,
             methods=['get'],
@@ -197,11 +195,10 @@ def handle_favorite_or_cart(request,
                 {'status': remove_message},
                 status=status.HTTP_204_NO_CONTENT
             )
-        else:
-            return Response(
-                {'status': f'Не найден рецепт в {remove_message.lower()}.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        return Response(
+            {'status': f'Не найден рецепт в {remove_message.lower()}.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 def create_shopping_list_file(user_id):
@@ -281,13 +278,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     )
                 ),
             )
-        else:
-            query = query.annotate(
-                is_favorited=d_models.Value(
-                    False, output_field=d_models.BooleanField()),
-                is_in_shopping_cart=d_models.Value(
-                    False, output_field=d_models.BooleanField()),
-            )
+        query = query.annotate(
+            is_favorited=d_models.Value(
+                False, output_field=d_models.BooleanField()),
+            is_in_shopping_cart=d_models.Value(
+                False, output_field=d_models.BooleanField()),
+        )
         return query.order_by('-pub_date').all()
 
     def get_serializer_class(self):
