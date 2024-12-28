@@ -278,7 +278,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 is_in_shopping_cart=d_models.Exists(
                     ShoppingCart.objects.filter(
                         user_id=self.request.user.id, recipe=d_models.OuterRef(
-                            'pk')
+                            'id')
                     )
                 ),
             )
@@ -339,7 +339,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path='favorite')
     def favorite(self, request, *args, **kwargs):
         user = request.user
-        recipe = get_object_or_404(Recipe, id=self.kwargs.get('pk'))
+        recipe = get_object_or_404(Recipe, id=self.kwargs.get('id'))
 
         return handle_favorite_or_cart(
             request=request,
