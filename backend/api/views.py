@@ -27,11 +27,12 @@ from .serializers import (FavoriteSerializer, UserSerializer,
 
 class UserViewSet(djoser_views.UserViewSet):
     """Вьюсет для управления пользователями."""
+
     queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    search_fields = ("username",)
-    http_method_names = ("get", "post", "put", "delete")
-    lookup_field = "id"
+    search_fields = ('username',)
+    http_method_names = ('get', 'post', 'put', 'delete')
+    lookup_field = 'id'
     pagination_class = ApiPagination
 
     def get_permissions(self):
@@ -53,13 +54,13 @@ class UserViewSet(djoser_views.UserViewSet):
 
     @action(
         detail=False,
-        methods=("put", "delete"),
+        methods=('put', 'delete'),
         url_path='me/avatar'
     )
     def avatar(self, request):
         """Изменение и удаление аватара текущего пользователя."""
         user = request.user
-        if request.method == "PUT":
+        if request.method == 'PUT':
             data = request.data.get('avatar')
             serializer = self.get_serializer(
                 user, data={'avatar': data}, partial=True)
@@ -70,16 +71,16 @@ class UserViewSet(djoser_views.UserViewSet):
                                    'http://localhost:8000'
                                    )
                 return Response(
-                    {"avatar": f"{base_url}/{user.avatar}"},
+                    {'avatar': f'{base_url}/{user.avatar}'},
                     status=status.HTTP_200_OK
                 )
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST
                             )
 
-        elif request.method == "DELETE":
+        elif request.method == 'DELETE':
             user.avatar.delete(save=True)
-            return Response({"detail": "Аватар удалён."},
+            return Response({'detail': 'Аватар удалён.'},
                             status=status.HTTP_204_NO_CONTENT
                             )
 
@@ -213,13 +214,13 @@ def create_shopping_list_file(user_id):
         .annotate(total_amount=d_models.Sum('amount'))
     )
     buffer = BytesIO()
-    buffer.write("Список покупок:\n\n".encode('utf-8'))
+    buffer.write('Список покупок:\n\n'.encode('utf-8'))
 
     for item in ingredients:
         ingredient_name = item['ingredient__name']
         measurement_unit = item['ingredient__measurement_unit']
         total_amount = item['total_amount']
-        line = f"- {ingredient_name}: {total_amount} {measurement_unit}\n"
+        line = f'- {ingredient_name}: {total_amount} {measurement_unit}\n'
         buffer.write(line.encode('utf-8'))
 
     buffer.seek(0)
@@ -330,7 +331,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe.save()
         full_short_url = f'{base_url}/s/{recipe.short_url}'
 
-        return Response({"short-link": full_short_url})
+        return Response({'short-link': full_short_url})
 
     @action(
         detail=True,

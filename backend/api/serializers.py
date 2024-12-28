@@ -40,10 +40,10 @@ class UserSerializer(serializers.ModelSerializer):
         if request.method in ('POST', 'PUT', 'DELETE') and (
                 not request.path.startswith('/api/users/')):
             if not request.user.is_authenticated:
-                raise serializers.ValidationError("У вас нет прав.")
+                raise serializers.ValidationError('У вас нет прав.')
 
         if 'avatar' in attrs and attrs['avatar'] is None:
-            raise serializers.ValidationError("Аватарку добавь.")
+            raise serializers.ValidationError('Аватарку добавь.')
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -142,28 +142,28 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def validate_ingredients(self, value):
         if not value:
             raise serializers.ValidationError(
-                "Необходимо указать хотя бы один ингредиент.")
+                'Необходимо указать хотя бы один ингредиент.')
 
         unique_ingredient = set()
         for item in value:
             if item['amount'] <= 0:
                 raise serializers.ValidationError(
-                    "Количество ингредиентов должно быть больше нуля.")
+                    'Количество ингредиентов должно быть больше нуля.')
 
             if item['id'] in unique_ingredient:
                 raise serializers.ValidationError(
-                    "Ингредиенты должны быть уникальными.")
+                    'Ингредиенты должны быть уникальными.')
             unique_ingredient.add(item['id'])
         return value
 
     def validate_tags(self, value):
         if not value:
             raise serializers.ValidationError(
-                "Необходимо указать хотя бы один тег.")
+                'Необходимо указать хотя бы один тег.')
 
         if len(value) != len(set(value)):
             raise serializers.ValidationError(
-                "Теги должны быть уникальными."
+                'Теги должны быть уникальными.'
             )
         return value
 
@@ -230,9 +230,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         author = data.get('author')
         if Subscription.objects.filter(
                 user=user, author=author).exists():
-            raise serializers.ValidationError("Такая подписка уже существует.")
+            raise serializers.ValidationError('Такая подписка уже существует.')
         if user == author:
-            raise serializers.ValidationError("Подписаться на себя нельзя.")
+            raise serializers.ValidationError('Подписаться на себя нельзя.')
         return data
 
     def get_is_subscribed(self, obj):
@@ -253,10 +253,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         recipes = recipes[:limit]
         recipes_list = [
             {
-                "id": recipe.id,
-                "name": recipe.name,
-                "image": recipe.image.url,
-                "cooking_time": recipe.cooking_time
+                'id': recipe.id,
+                'name': recipe.name,
+                'image': recipe.image.url,
+                'cooking_time': recipe.cooking_time
             }
             for recipe in recipes
         ]
@@ -265,7 +265,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_avatar(self, obj):
         if obj.author.avatar:
-            return f"{settings.MEDIA_URL}{obj.author.avatar}"
+            return f'{settings.MEDIA_URL}{obj.author.avatar}'
         return None
 
 

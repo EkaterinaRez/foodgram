@@ -36,7 +36,6 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def total_favorites(self, obj):
         """Отображает сколько раз добавили в избранное рецептов."""
-
         return Favorite.objects.filter(recipe=obj).count()
 
     total_favorites.short_description = 'Всего добавлено в избранное'
