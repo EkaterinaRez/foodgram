@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views as djoser_views
+from djoser import serializers as djoser_serializers
 from io import BytesIO
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -41,6 +42,8 @@ class UserViewSet(djoser_views.UserViewSet):
     def get_serializer_class(self):
         if self.action in ('subscribe', 'list_subscriptions'):
             return SubscriptionSerializer
+        elif self.action == 'set_password':
+            return djoser_serializers.SetPasswordSerializer
         return UserSerializer
 
     def get_serializer_context(self):
@@ -315,30 +318,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         read_serializer = RecipeReadSerializer(
             recipe, context=self.get_serializer_context())
         return read_serializer.data
-
-    def create(self, request, *args, **kwargs):
-        """Переопределение для использования perform_create."""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        read_data = self.perform_create(
-            serializer)
-        return Response(read_data, status=status.HTTP_201_CREATED)
-
-    def update(self, request, *args, **kwargs):
-        """Переопределение для использования perform_update."""
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        write_serializer = self.get_serializer(
-            instance, data=request.data, partial=partial)
-        write_serializer.is_valid(raise_exception=True)
-        read_data = self.perform_update(
-            write_serializer)
-        return Response(read_data)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
             methods=['get'],
