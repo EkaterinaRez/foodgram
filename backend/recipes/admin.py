@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.db.models import Count, Prefetch
+from django.db.models import Prefetch
 
 from .models import (Favorite,
                      Ingredient,
