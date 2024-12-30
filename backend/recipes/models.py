@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from core.constants import MAX_GEN
 from core.generator import generate_short_url
 from core.validators import RecipeValidators
 from users.models import User
@@ -88,7 +89,8 @@ class Recipe(models.Model):
                     MaxValueValidator(500)],
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-    short_url = models.URLField(unique=True, null=True, blank=True)
+    short_url = models.CharField(
+        unique=True, null=True, blank=True, max_length=MAX_GEN)
 
     class Meta:
         ordering = ('-pub_date',)

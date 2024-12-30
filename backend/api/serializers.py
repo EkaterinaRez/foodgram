@@ -180,10 +180,16 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
+        # Не используем super, потому что конфликт с базовым update
+        instance.name = validated_data.get('name', instance.name)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get(
+            'cooking_time', instance.cooking_time)
+
         ingredients = validated_data.pop('ingredients', None)
         instance.ingredients.clear()
         self.create_ingredient(ingredients, instance)
+
         tags = validated_data.pop('tags', None)
         instance.tags.set(tags)
         return instance

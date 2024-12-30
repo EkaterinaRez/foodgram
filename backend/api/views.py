@@ -282,6 +282,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     )
                 ),
             )
+
+        author_param = self.request.GET.get('author')
+        if author_param == 'me':
+            query = query.filter(author=self.request.user.id)
+
         return query.order_by('-pub_date').all()
 
     def get_serializer_class(self):
