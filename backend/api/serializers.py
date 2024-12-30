@@ -185,7 +185,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         instance.text = validated_data.get('text', instance.text)
         instance.cooking_time = validated_data.get(
             'cooking_time', instance.cooking_time)
-
+        instance.save()
         ingredients = validated_data.pop('ingredients', None)
         instance.ingredients.clear()
         self.create_ingredient(ingredients, instance)
