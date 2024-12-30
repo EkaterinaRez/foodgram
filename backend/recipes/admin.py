@@ -40,11 +40,10 @@ class RecipeAdmin(admin.ModelAdmin):
         queryset = queryset.prefetch_related(
             'tags',
             Prefetch(
-                'recipeingredient_set',
+                'recipe_ingredients',
                 queryset=IngredientForRecipe.objects
                 .select_related('ingredient'))
         )
-        queryset = queryset.annotate(total_favorites_count=Count('favorite'))
 
         return queryset
 
