@@ -61,7 +61,9 @@ class FavoriteAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'recipe__name')
 
     def get_queryset(self, request):
-        queryset = super().get_queryset(request).select_related('user', 'recipe')
+        queryset = super().get_queryset(request).select_related(
+            'user', 'recipe'
+        )
         return queryset
 
 
